@@ -76,7 +76,7 @@ class WPT_Event {
 		$args = wp_parse_args( $args, $defaults );
 
 		if ( ! isset( $this->city ) ) {
-			$this->city = apply_filters( 'wpt_event_venue',get_post_meta( $this->ID,'city',true ),$this );
+			$this->city = apply_filters( 'wpt_event_city',get_post_meta( $this->ID,'city',true ),$this );
 		}
 
 		if ( $args['html'] ) {
