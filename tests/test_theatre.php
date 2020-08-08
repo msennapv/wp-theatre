@@ -6,7 +6,7 @@ class WPT_Test extends WP_UnitTestCase {
 		global $wp_theatre;
 		
 		parent::setUp();
-		
+
 		$this->wp_theatre = new WP_Theatre();
 		
 		$season_args = array(
@@ -85,6 +85,18 @@ class WPT_Test extends WP_UnitTestCase {
 		add_post_meta($this->upcoming_event_with_prices, '_wpt_event_tickets_price', 12);
 		add_post_meta($upcoming_event, 'tickets_status', WPT_Event::tickets_status_hidden );
 		
+		/* 
+		 * Make sure permalink structure is consistent when running query tests.
+		 * @see: https://core.trac.wordpress.org/ticket/27704#comment:7
+		 * @see: https://core.trac.wordpress.org/changeset/28967
+		 * @see: https://github.com/slimndap/wp-theatre/issues/48
+		 */
+		global $wp_rewrite;
+		$wp_rewrite->init(); 
+		$wp_rewrite->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+		create_initial_taxonomies(); 
+		$wp_rewrite->flush_rules();
+		
 	}
 
 	function tearDown() {
@@ -93,6 +105,26 @@ class WPT_Test extends WP_UnitTestCase {
 	}
 
 
+	function get_matching_rewrite_rule( $path ) {
+		$rewrite_rules = get_option( 'rewrite_rules' );
+		$match_path = untrailingslashit( parse_url( esc_url( $path ), PHP_URL_PATH ) );
+		$wordpress_subdir_for_site = parse_url( home_url(), PHP_URL_PATH );
+		if ( ! empty( $wordpress_subdir_for_site ) ) {
+			$match_path = str_replace( $wordpress_subdir_for_site, '', $match_path );
+		}
+		$match_path = ltrim( $match_path, '/' );
+		$target = false;
+		// Loop through all the rewrite rules until we find a match
+		foreach( $rewrite_rules as $rule => $maybe_target ) {
+			if ( preg_match( "!^$rule!", $match_path, $matches ) ) {
+				$target = $maybe_target;
+				break;
+			}
+		}
+		
+		return $target;
+	}
+	
 	function dump_events() {
 		$args = array(
 			'post_type'=>WPT_Event::post_type_name,
@@ -278,6 +310,14 @@ class WPT_Test extends WP_UnitTestCase {
 
 
 	}
+
+	function test_shortcode_wpt_events_filter_tag() {
+
+		$result = do_shortcode('[wpt_events tag="upcoming"]');
+		$this->assertEquals(1, substr_count($result, '"wp_theatre_event"'), $result);
+
+	}
+
 	
 	function test_shortcode_wpt_events_filter_category_deprecated() {
 		$this->assertEquals(3, substr_count(do_shortcode('[wpt_events category="muziek"]'), '"wp_theatre_event"'));
@@ -543,6 +583,114 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$this->assertEquals(1, substr_count($html, 'wp_theatre_integrationtype_iframe'));			
 		$this->assertNotContains('http://slimndap.com', $html);
+	}
+	
+	function test_tickets_iframe_is_on_ticket_page() {
+		global $wp_theatre;
+
+		// Create tickets page.
+		$args = array(
+			'post_title' => 'Tickets page',
+			'post_type' => 'page',
+			'post_content' => '[wp_theatre_iframe]',	
+		);
+		$page_id = $this->factory->post->create( $args );
+
+		// Enable iframe.
+		$wp_theatre->wpt_tickets_options = 	array(
+			'integrationtype' => 'iframe',
+			'iframepage' => $page_id,
+			'currencysymbol' => '$',
+		);
+		
+		add_post_meta($this->upcoming_event_with_prices, 'tickets_url', 'http://slimndap.com');
+
+		$url = add_query_arg( 'wpt_event_tickets', $this->upcoming_event_with_prices, get_permalink( $page_id ) );
+
+		$this->go_to( $url );
+
+		the_post();		
+		$actual = get_echo( 'the_content' );
+		
+		$expected = '<iframe src="http://slimndap.com" class="wp_theatre_iframe"></iframe>';
+		
+		$this->assertContains( $expected, $actual );
+		
+	}
+		
+	function test_tickets_iframe_is_on_ticket_page_with_pretty_permalinks() {
+		global $wp_theatre;
+		global $wp_rewrite;
+		
+		// Create tickets page.
+		$args = array(
+			'post_title' => 'Tickets page',
+			'post_type' => 'page',
+			'post_content' => '[wp_theatre_iframe]',	
+		);
+		$page_id = $this->factory->post->create( $args );
+
+		// Enable iframe.
+		$wp_theatre->wpt_tickets_options = 	array(
+			'integrationtype' => 'iframe',
+			'iframepage' => $page_id,
+			'currencysymbol' => '$',
+		);
+		$wp_theatre->setup->add_tickets_url_iframe_rewrites();		
+		$wp_rewrite->flush_rules();
+
+		$url = add_query_arg( 'wpt_event_tickets', $this->upcoming_event_with_prices, get_permalink( $page_id ) );
+		
+		$production = new WPT_Production( $this->production_with_upcoming_event );
+		$url = trailingslashit( get_permalink( $page_id ) ).$production->post()->post_name.'/'.$this->upcoming_event_with_prices;
+
+		$actual = $this->get_matching_rewrite_rule( $url );
+		$expected = 'index.php?pagename=tickets-page&wpt_event_tickets=$matches[2]';
+		$this->assertEquals( $expected, $actual );
+		
+		return;
+		
+	}
+		
+	function test_tickets_iframe_is_on_ticket_page_with_pretty_permalinks_and_parent_page() {
+		global $wp_theatre;
+		global $wp_rewrite;
+		
+		$args = array(
+			'post_type' => 'page',
+			'post_title' => 'Parent page',
+			'post_status' => 'published',	
+		);
+		$parent_id = $this->factory->post->create( $args );
+		
+		// Create tickets page.
+		$args = array(
+			'post_title' => 'Tickets page',
+			'post_type' => 'page',
+			'post_content' => '[wp_theatre_iframe]',
+			'post_parent' => $parent_id,
+		);
+		$page_id = $this->factory->post->create( $args );
+
+		// Enable iframe.
+		$wp_theatre->wpt_tickets_options = 	array(
+			'integrationtype' => 'iframe',
+			'iframepage' => $page_id,
+			'currencysymbol' => '$',
+		);
+		$wp_theatre->setup->add_tickets_url_iframe_rewrites();		
+		$wp_rewrite->flush_rules();
+
+		$url = add_query_arg( 'wpt_event_tickets', $this->upcoming_event_with_prices, get_permalink( $page_id ) );
+		
+		$production = new WPT_Production( $this->production_with_upcoming_event );
+		$url = trailingslashit( get_permalink( $page_id ) ).$production->post()->post_name.'/'.$this->upcoming_event_with_prices;
+
+		$actual = $this->get_matching_rewrite_rule( $url );
+		$expected = 'index.php?pagename=parent-page/tickets-page&wpt_event_tickets=$matches[2]';
+		$this->assertEquals( $expected, $actual );
+		
+		return;		
 	}
 		
 	function test_wpt_event_tickets_for_past_events_are_hiddedn() {
@@ -1334,6 +1482,41 @@ class WPT_Test extends WP_UnitTestCase {
 
 	}
 	
+
+	function test_is_nightly_event_start_time_with_date_filter_untouched() {
+
+		// Set the next dat start time offset to 4:00 AM.
+		$func = create_function(
+			'$next_day_start_time_offset',
+			'return 4 * HOUR_IN_SECONDS;'
+		);
+		
+		add_filter('theater/helpers/time/next_day_start_time_offset', $func);
+		
+		// Prepare an event that starts on 1 Jan 03:59 AM.
+		$production_args = array(
+			'post_type'=>WPT_Production::post_type_name,
+			'post_title' => 'Production on January 1st',
+		);	
+		$production_on_jan_1 = $this->factory->post->create($production_args);
+
+		$event_args = array(
+			'post_type'=>WPT_Event::post_type_name,
+			'post_title' => 'Event on January 1st, 03:59 AM',
+		);
+
+		$event_on_jan_1 = $this->factory->post->create($event_args);
+		add_post_meta($event_on_jan_1, WPT_Production::post_type_name, $production_on_jan_1);
+		add_post_meta($event_on_jan_1, 'event_date', date('Y-m-d H:i:s', strtotime((date('Y') + 2).'-01-01 03:59', time())));
+		
+		$event = new WPT_Event($event_on_jan_1);
+		
+		$expected = 'wp_theatre_event_starttime">3:59';
+		$actual = do_shortcode('[wpt_events]{{starttime|date(\'G:i\')}}[/wpt_events]');
+		$this->assertContains( $expected, $actual);
+
+	}
+	
 	/**
 	 * Test 'start_before' attribute in 'wpt_productions' shortcode.
 	 * @since	0.15.16
@@ -1375,5 +1558,35 @@ class WPT_Test extends WP_UnitTestCase {
 		$this->assertEquals($expected, $actual);				
 	}
 
+	/**
+	 * Test 's' attribute when getting events.
+	 * Confirms #272.
+	 * @since	0.15.32
+	 */
+	function test_s_in_events() {
+
+		global $wp_theatre;
+		
+		$post = array(
+			'ID' => $this->production_with_upcoming_events,
+			'post_title' => 'Shaka Zulu',
+		);
+		wp_update_post( $post );		
+		
+		$args = array(
+			's' => 'Zulu',	
+		);
+		
+		$events = $wp_theatre->events->get( $args );
+
+		$actual = $events;
+		$expected = 2;
+		$this->assertCount( $expected, $actual );
+
+		$actual = $events[0]->production()->ID;
+		$expected = $this->production_with_upcoming_events;
+		$this->assertEquals( $expected, $actual );
+
+	}
 	
 }

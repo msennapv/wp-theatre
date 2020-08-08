@@ -16,7 +16,8 @@ class WPT_Events extends WPT_Listing {
 	 *
 	 * This is needed to make `$wp_query->query_vars['wpt_category']` work.
 	 *
-	 * @since 0.10
+	 * @since 	0.10
+	 * @since	0.16	Added 'wpt_tag' to the query args.
 	 *
 	 * @param array $vars	The current public query vars.
 	 * @return array		The new public query vars.
@@ -26,6 +27,7 @@ class WPT_Events extends WPT_Listing {
 		$vars[] = 'wpt_month';
 		$vars[] = 'wpt_year';
 		$vars[] = 'wpt_category';
+		$vars[] = 'wpt_tag';
 		return $vars;
 	}
 
@@ -206,129 +208,6 @@ class WPT_Events extends WPT_Listing {
 	}
 
 	/**
-	 * Gets a list of events in HTML for a single day.
-	 *
-	 * @since 	0.10
-	 * @since	0.15.11	Added support for next day start time offset.
-	 *
-	 * @uses	Theater_Helpers_Time::get_next_day_start_time_offset() to get the next day start time offset.
-	 * @uses 	WPT_Events::get_html_grouped();
-	 *
-	 * @access 	private
-	 * @param 	string $day		The day in `YYYY-MM-DD` format.
-	 * @param 	array $args 	See WPT_Events::get_html() for possible values.
-	 * @return 	string			The HTML.
-	 */
-	private function get_html_for_day( $day, $args = array() ) {
-
-		/*
-		 * Set the `start`-filter to today.
-		 * Except when the active `start`-filter is set to a later date.
-		 */
-		if (
-			empty( $args['start'] ) ||
-			(strtotime( $args['start'] ) < strtotime( $day ))
-		) {
-			$args['start'] = $day.' +'.Theater_Helpers_Time::get_next_day_start_time_offset().' seconds';
-		}
-
-		/*
-		 * Set the `end`-filter to the next day.
-		 * Except when the active `end`-filter is set to an earlier date.
-		 */
-		if (
-			empty( $args['end'] ) ||
-			(strtotime( $args['end'] ) > strtotime( $day.' +1 day' ))
-		) {
-			$args['end'] = $day.' +1 day +'.Theater_Helpers_Time::get_next_day_start_time_offset().' seconds';
-		}
-
-		return $this->get_html_grouped( $args );
-	}
-
-	/**
-	 * Gets a list of events in HTML for a single month.
-	 *
-	 * @since 	0.10
-	 * @since	0.15.11	Added support for next day start time offset.
-	 *
-	 * @uses	Theater_Helpers_Time::get_next_day_start_time_offset() to get the next day start time offset.
-	 * @uses 	WPT_Events::get_html_grouped();
-	 *
-	 * @access 	private
-	 * @param 	string $day		The month in `YYYY-MM` format.
-	 * @param 	array $args 	See WPT_Events::get_html() for possible values.
-	 * @return 	string			The HTML.
-	 */
-	private function get_html_for_month( $month, $args = array() ) {
-
-		/*
-		 * Set the `start`-filter to the first day of the month.
-		 * Except when the active `start`-filter is set to a later date.
-		 */
-		if (
-			empty( $args['start'] ) ||
-			(strtotime( $args['start'] ) < strtotime( $month ))
-		) {
-			$args['start'] = $month.' +'.Theater_Helpers_Time::get_next_day_start_time_offset().' seconds';
-		}
-
-		/*
-		 * Set the `end`-filter to the first day of the next month.
-		 * Except when the active `end`-filter is set to an earlier date.
-		 */
-		if (
-			empty( $args['end'] ) ||
-			(strtotime( $args['end'] ) > strtotime( $month.' +1 month' ))
-		) {
-			$args['end'] = $month.' +1 month +'.Theater_Helpers_Time::get_next_day_start_time_offset().' seconds';
-		}
-
-		return $this->get_html_grouped( $args );
-	}
-
-	/**
-	 * Gets a list of events in HTML for a single year.
-	 *
-	 * @since 	0.10
-	 * @since	0.15.11	Added support for next day start time offset.
-	 *
-	 * @uses	Theater_Helpers_Time::get_next_day_start_time_offset() to get the next day start time offset.
-	 * @uses 	WPT_Events::get_html_grouped();
-	 *
-	 * @access 	private
-	 * @param 	string $day		The year in `YYYY` format.
-	 * @param 	array $args 	See WPT_Events::get_html() for possible values.
-	 * @return 	string			The HTML.
-	 */
-	private function get_html_for_year( $year, $args = array() ) {
-
-		/*
-		 * Set the `start`-filter to the first day of the year.
-		 * Except when the active `start`-filter is set to a later date.
-		 */
-		if (
-			empty( $args['start'] ) ||
-			(strtotime( $args['start'] ) < strtotime( $year.'-01-01' ))
-		) {
-			$args['start'] = $year.'-01-01 +'.Theater_Helpers_Time::get_next_day_start_time_offset().' seconds';
-		}
-
-		/*
-		 * Set the `end`-filter to the first day of the next year.
-		 * Except when the active `end`-filter is set to an earlier date.
-		 */
-		if (
-			empty( $args['end'] ) ||
-			(strtotime( $args['end'] ) > strtotime( $year.'-01-01 +1 year' ))
-		) {
-			$args['end'] = $year.'-01-01 +1 year +'.Theater_Helpers_Time::get_next_day_start_time_offset().' seconds';
-		}
-
-		return $this->get_html_grouped( $args );
-	}
-
-	/**
 	 * Gets a list of events in HTML for a page.
 	 *
 	 * @since	0.10
@@ -336,6 +215,7 @@ class WPT_Events extends WPT_Listing {
 	 *						Fixes #217.
 	 *						Maybe this is caused by wp_resolve_numeric_slug_conflicts(), which was
 	 *						added in WP 4.3.
+	 * @since	0.16		Added support for tags.
 	 *
 	 * @see WPT_Events::get_html_grouped()
 	 * @see WPT_Events::get_html_for_year()
@@ -366,6 +246,8 @@ class WPT_Events extends WPT_Listing {
 			$html = $this->get_html_for_day( $wp_query->query['wpt_day'], $args );
 		} elseif ( ! empty( $wp_query->query_vars['wpt_category'] ) ) {
 			$html = $this->get_html_for_category( $wp_query->query_vars['wpt_category'], $args );
+		} elseif ( ! empty( $wp_query->query_vars['wpt_tag'] ) ) {
+			$html = $this->get_html_for_tag( $wp_query->query_vars['wpt_tag'], $args );
 		} else {
 			/*
 			 * The user didn't select a page.
@@ -387,6 +269,25 @@ class WPT_Events extends WPT_Listing {
 	}
 
 	/**
+	 * Gets a list of events in HTML for a single tag.
+	 *
+	 * @since 0.16
+	 *
+	 * @see WPT_Events::get_html_grouped();
+	 *
+	 * @access	private
+	 * @param	string	$tag_slug		Slug of the category.
+	 * @param	array	$args 			See WPT_Events::get_html() for possible values.
+	 * @return	string					The HTML.
+	 */
+	private function get_html_for_tag( $tag_slug, $args = array() ) {
+		if ( $tag = get_term_by( 'slug', $tag_slug, 'post_tag' ) ) {
+			$args['tag'] = $tag->slug;
+		}
+		return $this->get_html_grouped( $args );
+	}
+
+	/**
 	 * Gets a list of events in HTML.
 	 *
 	 * The events can be grouped inside a page by setting $groupby.
@@ -394,6 +295,8 @@ class WPT_Events extends WPT_Listing {
 	 *
 	 * @since 	0.10
 	 * @since	0.14.7	Added $args to $event->html().
+	 * @since	0.15.29	Added $args to all header filters.
+	 * @since	0.16	Added support for tags.
 	 *
 	 * @see WPT_Event::html();
 	 * @see WPT_Events::get_html_for_month();
@@ -404,7 +307,7 @@ class WPT_Events extends WPT_Listing {
 	 * @param 	array $args 	See WPT_Events::get_html() for possible values.
 	 * @return 	string			The HTML.
 	 */
-	private function get_html_grouped( $args = array() ) {
+	protected function get_html_grouped( $args = array() ) {
 
 		$args = wp_parse_args( $args, $this->default_args_for_html );
 
@@ -423,7 +326,19 @@ class WPT_Events extends WPT_Listing {
 				foreach ( $days as $day => $name ) {
 					if ( $day_html = $this->get_html_for_day( $day, $args ) ) {
 						$html .= '<h3 class="wpt_listing_group day">';
-						$html .= apply_filters( 'wpt_listing_group_day',date_i18n( 'l d F',strtotime( $day ) ),$day );
+
+						/**
+						 * Filter the day header in an events list.
+						 * 
+						 * @since 	0.?
+						 * @since	0.15.29	Added the $args param.
+						 *
+						 * @param	string	$header	The header.
+						 * @param	string	$day	The day.
+						 * @param	array	$args	The arguments for the HTML of this list.
+						 */
+						$html .= apply_filters( 'wpt_listing_group_day', date_i18n( 'l d F',strtotime( $day ) ), $day, $args );
+						
 						$html .= '</h3>';
 						$html .= $day_html;
 					}
@@ -434,7 +349,19 @@ class WPT_Events extends WPT_Listing {
 				foreach ( $months as $month => $name ) {
 					if ( $month_html = $this->get_html_for_month( $month, $args ) ) {
 						$html .= '<h3 class="wpt_listing_group month">';
-						$html .= apply_filters( 'wpt_listing_group_month',date_i18n( 'F',strtotime( $month ) ),$month );
+						
+						/**
+						 * Filter the month header in an events list.
+						 * 
+						 * @since 	0.?
+						 * @since	0.15.29	Added the $args param.
+						 *
+						 * @param	string	$header	The header.
+						 * @param	string	$day	The month.
+						 * @param	array	$args	The arguments for the HTML of this list.
+						 */
+						$html .= apply_filters( 'wpt_listing_group_month', date_i18n( 'F',strtotime( $month ) ), $month, $args );
+						
 						$html .= '</h3>';
 						$html .= $month_html;
 					}
@@ -445,7 +372,19 @@ class WPT_Events extends WPT_Listing {
 				foreach ( $years as $year => $name ) {
 					if ( $year_html = $this->get_html_for_year( $year, $args ) ) {
 						$html .= '<h3 class="wpt_listing_group year">';
-						$html .= apply_filters( 'wpt_listing_group_year',date_i18n( 'Y',strtotime( $year.'-01-01' ) ),$year );
+						
+						/**
+						 * Filter the year header in an events list.
+						 * 
+						 * @since 	0.?
+						 * @since	0.15.29	Added the $args param.
+						 *
+						 * @param	string	$header	The header.
+						 * @param	string	$day	The year.
+						 * @param	array	$args	The arguments for the HTML of this list.
+						 */
+						$html .= apply_filters( 'wpt_listing_group_year', date_i18n( 'Y',strtotime( $year.'-01-01' ) ), $year, $args );
+						
 						$html .= '</h3>';
 						$html .= $year_html;
 					}
@@ -456,9 +395,43 @@ class WPT_Events extends WPT_Listing {
 				foreach ( $categories as $cat_id => $name ) {
 					if ( $cat_html = $this->get_html_for_category( $cat_id, $args ) ) {
 						$html .= '<h3 class="wpt_listing_group category">';
-						$html .= apply_filters( 'wpt_listing_group_category',$name,$cat_id );
+						
+						/**
+						 * Filter the category header in an events list.
+						 * 
+						 * @since 	0.?
+						 * @since	0.15.29	Added the $args param.
+						 *
+						 * @param	string	$header	The header.
+						 * @param	string	$day	The category.
+						 * @param	array	$args	The arguments for the HTML of this list.
+						 */
+						$html .= apply_filters( 'wpt_listing_group_category', $name, $cat_id, $args );
+						
 						$html .= '</h3>';
 						$html .= $cat_html;
+					}
+				}
+				break;			
+			case 'tag':
+				$tags = $this->get_tags( $args );
+				foreach ( $tags as $slug => $name ) {
+					if ( $tag_html = $this->get_html_for_tag( $slug, $args ) ) {
+						$html .= '<h3 class="wpt_listing_group tag">';
+						
+						/**
+						 * Filter the tag header in an events list.
+						 * 
+						 * @since 	0.16
+						 *
+						 * @param	string	$header	The header.
+						 * @param	string	$slug	The tag slug.
+						 * @param	array	$args	The arguments for the HTML of this list.
+						 */
+						$html .= apply_filters( 'wpt_listing_group_tag', $name, $slug, $args );
+						
+						$html .= '</h3>';
+						$html .= $tag_html;
 					}
 				}
 				break;
@@ -519,6 +492,7 @@ class WPT_Events extends WPT_Listing {
 	 * Gets the pagination filters for an event listing.
 	 *
 	 * @since	0.13.4
+	 * @since	0.16	Added the tag filter.
 	 * @return 	array	The pagination filters for an event listing.
 	 */
 	public function get_pagination_filters() {
@@ -549,6 +523,12 @@ class WPT_Events extends WPT_Listing {
 			'callback' => array( $this, 'get_categories' ),
 		);
 
+		$filters['tag'] = array(
+			'title' => __( 'Tags', 'theatre' ),
+			'query_arg' => 'wpt_tag',
+			'callback' => array( $this, 'get_tags' ),
+		);
+
 		/**
 		 * Filter the pagination filters for an event listing.
 		 *
@@ -558,6 +538,30 @@ class WPT_Events extends WPT_Listing {
 		$filters = apply_filters( 'wpt/events/pagination/filters', $filters );
 
 		return $filters;
+	}
+
+	/**
+	 * Gets all tags for events.
+	 *
+	 * @since 0.16
+	 *
+	 * @param 	array 	$filters	See WPT_Events::get() for possible values.
+	 * @return 	array 				Tags.
+	 */
+	 function get_tags( $filters = array() ) {
+		
+		$filters['tag'] = false;
+		$events = $this->get( $filters );
+		$event_ids = wp_list_pluck( $events, 'ID' );
+		$terms = wp_get_object_terms( $event_ids, 'post_tag' );
+		$tags = array();
+
+		foreach ( $terms as $term ) {
+			$tags[ $term->slug ] = $term->name;
+		}
+
+		asort( $tags );
+		return $tags;
 	}
 
 	/**
@@ -730,8 +734,10 @@ class WPT_Events extends WPT_Listing {
 	 * @since	0.13.1	'Start' and 'end' filter explicitly set to 'NUMERIC'.
 	 *					Fixes #168.
 	 * @since	0.15	Added support for 's' (keyword search).
+	 * @since	0.15.32 's' now actually works.
+	 *					Fixes #272.
 	 *
-		 * @return array Events.
+	 * @return array Events.
 	 */
 
 	public function get( $filters = array() ) {
@@ -840,12 +846,13 @@ class WPT_Events extends WPT_Listing {
 			$productions_by_keyword_args = array(
 				's' => $filters['s'],
 				'status' => $filters['status'],
+				'ignore_sticky_posts' => true,
 			);
 			$productions_by_keyword = $wp_theatre->productions->get($productions_by_keyword_args);
 						
 			$args['meta_query'][] = array(
 				'key' => WPT_Production::post_type_name,
-				'value' => $productions_by_keyword,
+				'value' => wp_list_pluck( $productions_by_keyword, 'ID' ),
 				'compare' => 'IN',				
 			);
 		}

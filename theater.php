@@ -3,9 +3,9 @@
 	
 	Plugin Name: Theater
 	Plugin URI: https://wp.theater/
-	Description: Turn your Wordpress website into a theater website.
+	Description: Manage and publish events for your theater, live venue, cinema, club or festival.
 	Author: Jeroen Schmit
-	Version: 0.15.28
+	Version: 0.16.1
 	Author URI: http://slimndap.com/
 	Text Domain: theatre
 	Domain Path: /lang
@@ -28,7 +28,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	
-$wpt_version = '0.15.28';
+$wpt_version = '0.16.1';
 
 class WP_Theatre {
 	function __construct() {
@@ -39,7 +39,7 @@ class WP_Theatre {
 	
 		// Includes
 		$this->includes();
-	
+
 		// Setup
 		$this->setup = new WPT_Setup();
 		$this->admin = new WPT_Admin();
@@ -114,6 +114,7 @@ class WP_Theatre {
 		require_once(dirname(__FILE__) . '/functions/wpt_listing.php');
 		require_once(dirname(__FILE__) . '/functions/event/class-theater-event-archive.php');
 		require_once(dirname(__FILE__) . '/functions/event/class-theater-event-order.php');
+		require_once(dirname(__FILE__) . '/functions/event/class-theater-event-embed.php');
 
 		require_once(dirname(__FILE__) . '/functions/template/wpt_template.php');	
 		require_once(dirname(__FILE__) . '/functions/template/wpt_template_placeholder.php');	
@@ -185,9 +186,16 @@ class WP_Theatre {
 		flush_rewrite_rules();		
 	}
 	
+	/**
+	 * Cleans up after plugin deactivation.
+	 * 
+	 * @since 	0.?
+	 * @since	0.15.33	No longer removes all order indexes.
+	 *			Fixes #274.
+	 * @return 	void
+	 */
 	function deactivate() {
 		wp_clear_scheduled_hook('wpt_cron');
-		delete_post_meta_by_key($this->order->meta_key);
 		flush_rewrite_rules();		
 	}
 

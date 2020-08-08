@@ -2,16 +2,17 @@
 Contributors: slimndap
 Tags: theatre, stage, venue, events, shows, concerts, tickets, ticketing, sports, performances, calendar, festival, workshops, theater, cinema
 Requires at least: 4.0
-Tested up to: 4.8
-Stable tag: 0.15
+Tested up to: 5.3
+Requires PHP: 5.4
+Stable tag: trunk
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CZERCBG5SUGQW
 
-A free plugin to publish your events on a WordPress website. Perfect for theaters, live venues, cinemas and festivals.
+Manage and publish events for your theater, live venue, cinema, club or festival.
 
 == Description ==
-A WordPress plugin to manage events with all necessary shortcodes and widgets for your theater.
+A WordPress plugin to manage and publish events for your theater, live venue, cinema, club or festival.
 
 
 __Shortcodes__
@@ -123,6 +124,19 @@ The new feature may be added directly to the Theater plugin or as an extension s
 
 == Changelog ==
 
+= 0.16 =
+
+Release Date: July 25, 2018
+
+* Enhancements
+    * Added date and category filter to the events admin screen.
+    * Added a custom excerpt to embedded events (using oEmbed).
+    * Made it possible to paginate events by tag. See the updated [docs](https://github.com/slimndap/wp-theatre/wiki/Shortcodes).  
+    * Made it possible to group events by tag. See the updated [docs](https://github.com/slimndap/wp-theatre/wiki/Shortcodes). 
+* Bugfix
+    * Fixed a performance issue if your site uses a lot of transients (0.16.1).
+	* Fixed a timezone [issue](https://github.com/slimndap/wp-theatre/issues/296) with groupby/paginateby inside listings (0.16.1).
+
 = 0.15 =
 
 Release Date: March 22nd, 2016
@@ -144,6 +158,8 @@ This release focusses on a more streamlined experience when managing your events
 	* The use of transients for event lists and calendar can now be switched off using the `theater/transient/active` filter (0.15.24). Thank you [joost de keijzer](https://dekeijzer.org/)!
     * Added a new `{{tags}}` placeholder for events (0.15.27). See the updated [docs](https://github.com/slimndap/wp-theatre/wiki/Shortcodes). Thank you [Raymond van Melzen](https://www.vanmelzen.com/)!
     * Internal changes to further improve performance of importers (0.15.27).
+    * Added CSS classes to the event editor to make it easier for developer to customise (0.15.29). Thank you [joost de keijzer](https://dekeijzer.org/)!
+    * Performance improvements when ordering events on websites with _a lot_ of events (0.15.30).
 
 * Bugfix
     * The translation setting for the header above events on the productions page was also being used in other places (eg. the admin menu) (0.15.2). Thank you [Bob Morris](https://wordpress.org/support/profile/bob-morris)!
@@ -164,6 +180,13 @@ This release focusses on a more streamlined experience when managing your events
 	* Fixed several performance issues of during imports (0.15.24).
 	* Fixed a conflict with WP-CLI. (0.15.24).
 	* Fixed an [issue](https://github.com/slimndap/wp-theatre/pull/242) with the fallback of custom field values of events. Thank you [joost de keijzer](https://dekeijzer.org/)!
+	* Fixed an [issue](https://github.com/slimndap/wp-theatre/issues/269) where sometimes events are shown in the wrong order (0.15.30).
+	* Fixed another [issue](https://github.com/slimndap/wp-theatre/issues/270) where sometimes events are shown in the wrong order (0.15.31).
+	* Fixed an [issue](https://github.com/slimndap/wp-theatre/issues/272) with the keyword filter for events (0.15.32).
+	* Fixed an [issue](https://github.com/slimndap/wp-theatre/issues/237) with event lists on a page with a parent page (0.15.33).
+	* Fixed an [issue](https://github.com/slimndap/wp-theatre/issues/262) with the tickets iframe when the tickets page is a page with a parent page (0.15.33).
+	* Fixed an [issue](https://github.com/slimndap/wp-theatre/issues/274) where events are gone after you deactivate en reactivate the plugin.
+	
 	
 	
 * Deprecations
@@ -246,6 +269,24 @@ Release Date: May 30th, 2015
 
 
 == Upgrade Notice ==
+
+= 0.16 =
+New date and category filters on the events admin screen. New grouping by tag options for the front end.
+
+= 0.15.33 =
+Maintenance release fixing several long-standing minor issues.
+
+= 0.15.32 =
+Fixed an issue with the keyword filter for events.
+
+= 0.15.31 =
+Fixed another issue where sometimes events are shown in the wrong order.
+
+= 0.15.30 =
+Fixed an issue where sometimes events are shown in the wrong order.
+
+= 0.15.29 =
+Made it easier for developers to customize the event editor.
 
 = 0.15.28 =
 Fixes a problem with the Categories widget that was introduced in a previous update.

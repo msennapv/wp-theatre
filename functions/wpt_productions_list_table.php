@@ -26,6 +26,57 @@ class WPT_Productions_List_Table extends WP_List_Table {
 	}
 
 	/**
+	 * Displays a categories drop-down for filtering on the Events list table.
+	 *
+	 * @since 0.16
+	 */
+	function categories_dropdown( ) {
+
+		$dropdown_options = array(
+			'show_option_all' => get_taxonomy( 'category' )->labels->all_items,
+			'hide_empty'      => 0,
+			'hierarchical'    => 1,
+			'show_count'      => 0,
+			'orderby'         => 'name',
+			'selected'        => empty( $_REQUEST['cat'] ) ? '' :  $_REQUEST['cat'],
+		);
+		echo '<label class="screen-reader-text" for="cat">' . __( 'Filter by category' ) . '</label>';
+		wp_dropdown_categories( $dropdown_options );
+		
+	}
+
+	/**
+	 * Displays a dates drop-down for filtering on the Events list table.
+	 *
+	 * @since 0.16
+	 */
+	function dates_dropdown( ) {
+
+		$options = array (
+			'0' => __( 'All dates' ),
+			'upcoming' => __( 'Upcoming events', 'wdcdc' ),
+			'past' => __( 'Past events', 'wdcdc' ),			
+		);
+
+		$date = false;
+		if ( !empty( $_REQUEST['date'] ) ) {
+			$date = $_REQUEST['date'];
+		}
+
+		?><label class="screen-reader-text" for="date"><?php
+			_e( 'Filter by date', 'wp_theatre' ); 
+		?></label>
+		<select id="date" name="date"><?php
+			foreach( $options as $key => $value ) {
+				?><option value="<?php echo $key; ?>" <?php selected( $date, $key, true );?>><?php 
+					echo $value;
+				?></option><?php				
+			}
+		?></select><?php
+					
+	}
+
+	/**
 	 * Gets the HTML of the production categories for use in the category column.
 	 *
 	 * @since	0.15
@@ -52,6 +103,26 @@ class WPT_Productions_List_Table extends WP_List_Table {
 			$this->_args['singular'],
 			$production->ID
 		);
+	}
+	
+	/**
+	 * Handles the default column output.
+	 *
+	 * @since 0.16
+	 *
+	 * @param WP_Post $post        The current WP_Post object.
+	 * @param string  $column_name The current column name.
+	 */
+	 function column_default( $post, $column_name ) {
+		/**
+		 * Fires for each custom column of a specific post type in the Posts list table.
+		 *
+		 * @since 0.16
+		 *
+		 * @param string $column_name The name of the column to display.
+		 * @param int    $post_id     The current post ID.
+		 */
+		 do_action( 'manage_'.WPT_Production::post_type_name.'_posts_custom_column', $column_name, $post->ID );
 	}
 
 	/**
@@ -93,6 +164,7 @@ class WPT_Productions_List_Table extends WP_List_Table {
 	 *
 	 * @since	0.15.4
 	 * @since	0.15.17 		Added two filters to add extra controls.
+	 * @since	0.16			Added dates and categories filters.
 	 * @param 	string	$which	Location of table nav ('top' or 'bottom').
 	 */
 	function extra_tablenav( $which ) {
@@ -102,7 +174,10 @@ class WPT_Productions_List_Table extends WP_List_Table {
 	        if ( 'top' === $which && !is_singular() ) {
 		        
 	            ob_start();
-	 
+	            
+	            $this->dates_dropdown();
+	            $this->categories_dropdown();
+	            
 	            /**
 	             * Fires before the Filter button on the Productions list table.
 	             *
@@ -181,7 +256,15 @@ class WPT_Productions_List_Table extends WP_List_Table {
 			'title' => __( 'Event', 'theatre' ),
 			'categories' => __( 'Categories', 'theatre' ),
 		);
-		return $columns;
+		
+		/**
+		 * Filters the columns displayed in the Events list table.
+		 *
+		 * @since 0.16
+		 *
+		 * @param string[] $post_columns An associative array of column headings.
+		 */
+		return apply_filters( 'manage_'.WPT_Production::post_type_name.'_posts_columns', $columns );
 	}
 
 	/**
@@ -194,7 +277,40 @@ class WPT_Productions_List_Table extends WP_List_Table {
 		$sortable_columns = array(
 			'title' => array( 'title',false ),
 		);
-		return $sortable_columns;
+
+		/**
+		 * Filters the sortable columns displayed in the Events list table.
+		 *
+		 * @since 0.16
+		 *
+		 * @param string[] $post_columns An associative array of column headings.
+		 */
+		return apply_filters( 'manage_'.WPT_Production::post_type_name.'_sortable_columns', $sortable_columns );
+	}
+	
+	function get_productions_args_from_dates_dropdown() {
+		
+		if( empty( $_REQUEST['date'] ) ) {
+			return false;
+		}
+		
+		switch ( $_REQUEST['date'] ) {
+		
+			case 'upcoming' :
+				$args = array(
+					'end_after' => 'now',	
+				);
+				break;
+			case 'past';
+				$args = array(
+					'end_before' => 'now',	
+				);
+				break;
+			default:
+				$args = false;
+		}
+		
+		return $args;
 	}
 
 	/**
@@ -267,6 +383,7 @@ if ( empty( $_REQUEST['s'] ) ) {
 	 * @since	0.15
 	 * @since	0.15.2	Added a context for the productions.
 	 * @since	0.15.21	Items per page now uses WP_List_Table::get_items_per_page() from WordPress core.
+	 * @since	0.16	Added dates and categories filters.
 	 * @return 	void
 	 */
 	function prepare_items() {
@@ -291,6 +408,14 @@ if ( empty( $_REQUEST['s'] ) ) {
 	    if ( ! empty( $_REQUEST['s'] ) ) {
 		    $production_args['s'] = sanitize_text_field( $_REQUEST['s'] );
 	    }
+
+	    if ( ! empty( $_REQUEST['cat'] ) ) {
+		    $production_args['cat'] = sanitize_text_field( $_REQUEST['cat'] );
+	    }
+
+		if ( $date_args = self::get_productions_args_from_dates_dropdown() ) {
+			$production_args = array_merge( $production_args, $date_args );
+		}
 
 		$productions = $wp_theatre->productions->get( $production_args );
 
