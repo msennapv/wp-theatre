@@ -306,6 +306,9 @@ Release Date: May 30th, 2015
 
 == Upgrade Notice ==
 
+= 0.18.8 =
+Security update and CSS improvements.
+
 = 0.18.7 =
 Security update.
 
