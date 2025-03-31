@@ -120,7 +120,7 @@ class WPT_Event_Editor {
 
 		// Ensure the current user has the capability to delete the post.
 		if ( ! current_user_can( 'delete_post', $event_id ) ) {
-		    wp_die( 'You are not allowed to delete this event.' );
+		    wp_die( __( 'You are not allowed to delete this date.', 'theatre' ) );
 		}
 		
 		$event = new WPT_Event( $event_id );
