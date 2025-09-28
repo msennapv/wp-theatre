@@ -92,7 +92,7 @@ class Theater_Jeero_Suggest {
 							</div>
 		
 							<div class="desc column-description"><?php
-								esc_html_e( sprintf( 'Import %s events into Theater for WordPress.', $theater->title ), 'theatre' ); ?></div>
+								printf( esc_html__( 'Import %s events into Theater for WordPress.', 'theatre' ), $theater->title ); ?></div>
 						</div>
 		
 					</div><?php
