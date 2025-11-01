@@ -191,6 +191,25 @@ class WPT_Test_Transients extends WPT_UnitTestCase {
 		$actual = Theater_Transients::get_transient_keys();
 		$this->assertEmpty( $actual );
 	}
+
+	/**
+	 * When the expiration filter forces a zero TTL the transient should never persist.
+	 */
+	function test_transient_is_not_cached_when_expiration_is_zero() {
+		// Simulate a site forcing immediate expiration via the public filter hook.
+		add_filter( 'theater/transient/expiration', '__return_zero', 10, 2 );
+
+		// Use a random key to avoid interference from other test runs.
+		$transient = new Theater_Transient( 'test', array( 'id' => uniqid( 'transient_', true ) ) );
+
+		// set() should report failure because the value must not be cached.
+		$this->assertFalse( $transient->set( 'should-not-cache' ) );
+		// get() must also return false, confirming nothing was stored.
+		$this->assertFalse( $transient->get() );
+
+		// Clean up the filter to avoid affecting subsequent tests.
+		remove_filter( 'theater/transient/expiration', '__return_zero', 10 );
+	}
 	
 	function test_transients_are_off_for_logged_in_users() {
 		$this->setup_test_data();

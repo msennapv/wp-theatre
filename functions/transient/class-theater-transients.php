@@ -24,6 +24,9 @@ class Theater_Transients {
 		if ( ! defined( 'THEATER_TRANSIENTS_OPTION' ) ) {
 			define( 'THEATER_TRANSIENTS_OPTION', 'theater_transient_keys' );
 		}
+		if ( ! defined( 'THEATER_TRANSIENTS_META_OPTION' ) ) {
+			define( 'THEATER_TRANSIENTS_META_OPTION', 'theater_transient_metadata' );
+		}
 
 		self::enable_reset_hooks();
 
@@ -88,6 +91,78 @@ class Theater_Transients {
 	}
 
 	/**
+	 * Gets metadata for all registered Theater transients.
+	 *
+	 * @since	0.18.9
+	 *
+	 * @return array
+	 */
+	static function get_transient_metadata() {
+		$metadata = get_option( THEATER_TRANSIENTS_META_OPTION );
+
+		if ( ! $metadata || ! is_array( $metadata ) ) {
+			$metadata = array();
+		}
+
+		return $metadata;
+	}
+
+	/**
+	 * Gets metadata for a specific Theater transient.
+	 *
+	 * @since	0.18.9
+	 *
+	 * @param	string	$key	The transient key.
+	 * @return	array|null
+	 */
+	static function get_transient_metadata_for( $key ) {
+		$metadata = self::get_transient_metadata();
+
+		if ( isset( $metadata[ $key ] ) && is_array( $metadata[ $key ] ) ) {
+			return $metadata[ $key ];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Updates metadata for a specific Theater transient.
+	 *
+	 * @since	0.18.9
+	 *
+	 * @param	string	$key		The transient key.
+	 * @param	array	$metadata	The metadata to store.
+	 * @return	void
+	 */
+	static function update_transient_metadata( $key, $metadata ) {
+		$stored_metadata = self::get_transient_metadata();
+
+		$stored_metadata[ $key ] = array(
+			'generated_at' => isset( $metadata['generated_at'] ) ? (int) $metadata['generated_at'] : 0,
+			'expiration'   => isset( $metadata['expiration'] ) ? (int) $metadata['expiration'] : 0,
+		);
+
+		update_option( THEATER_TRANSIENTS_META_OPTION, $stored_metadata, false );
+	}
+
+	/**
+	 * Deletes metadata for a specific Theater transient.
+	 *
+	 * @since	0.18.9
+	 *
+	 * @param	string	$key	The transient key.
+	 * @return	void
+	 */
+	static function delete_transient_metadata( $key ) {
+		$stored_metadata = self::get_transient_metadata();
+
+		if ( isset( $stored_metadata[ $key ] ) ) {
+			unset( $stored_metadata[ $key ] );
+			update_option( THEATER_TRANSIENTS_META_OPTION, $stored_metadata, false );
+		}
+	}
+
+	/**
 	 * Resets all Theater transients in use.
 	 *
 	 * @since 	0.7
@@ -107,4 +182,3 @@ class Theater_Transients {
 	}
 
 }
-
