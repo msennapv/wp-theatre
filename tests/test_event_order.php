@@ -7,7 +7,7 @@
  */
 class WPT_Test_Event_Order extends WPT_UnitTestCase {
 
-	function setUp() {
+	protected function setUp(): void {
 		parent::setUp();
 	}
 

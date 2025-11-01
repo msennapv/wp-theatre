@@ -3,3 +3,4 @@ config.codekit
 .idea
 apidocs
 wordpress.org
+vendor

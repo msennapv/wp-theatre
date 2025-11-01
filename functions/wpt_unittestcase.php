@@ -6,7 +6,7 @@
 
 class WPT_UnitTestCase extends WP_UnitTestCase {
 
-	function setUp() {
+	protected function setUp(): void {
 		global $wp_rewrite;
 
 		parent::setUp();

@@ -2,7 +2,7 @@
 
 class WPT_Test extends WP_UnitTestCase {
 
-	function setUp() {
+	protected function setUp(): void {
 		global $wp_theatre;
 		
 		parent::setUp();
@@ -99,7 +99,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 	}
 
-	function tearDown() {
+	protected function tearDown(): void {
 		parent::tearDown();
 		 wp_set_current_user( 0 );
 	}

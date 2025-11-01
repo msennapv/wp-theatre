@@ -1,7 +1,7 @@
 <?php
 class WPT_Test_Template extends WP_UnitTestCase {
 
-	function setUp() {
+	protected function setUp(): void {
 		parent::setUp();		
 	}
 

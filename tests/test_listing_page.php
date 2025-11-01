@@ -8,7 +8,7 @@
  */
 class WPT_Test_Listing_Page extends WP_UnitTestCase {
 
-	function setUp() {
+	protected function setUp(): void {
 		global $wp_rewrite; 
 		global $wp_theatre;
 		

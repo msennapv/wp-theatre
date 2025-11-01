@@ -134,7 +134,7 @@ class WPT_Demo_Importer extends WPT_Importer {
  */
 class WPT_Test_Importer extends WP_UnitTestCase {
 
-	function setUp() {
+	protected function setUp(): void {
 		global $wp_theatre;
 		$this->wp_theatre = $wp_theatre;
 
@@ -601,6 +601,5 @@ class WPT_Test_Importer extends WP_UnitTestCase {
 		
 	}
 }
-
 
 

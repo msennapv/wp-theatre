@@ -4,14 +4,13 @@
  *
  * @group context
  */
- 
- class WPT_Test_Context extends WP_UnitTestCase {
-	function setUp() {
-		global $wp_rewrite; 
+class WPT_Test_Context extends WPT_UnitTestCase {
+	protected function setUp(): void {
+		global $wp_rewrite;
 		global $wp_theatre;
-		
+
 		parent::setUp();
-		
+
 		$this->wp_theatre = $wp_theatre;
 		
 		// create a page for our listing

@@ -6,7 +6,7 @@
  */
 class WPT_Test_Event_Editor extends WP_UnitTestCase {
 
-	function setUp() {
+	protected function setUp(): void {
 		global $wp_theatre;
 		$this->wp_theatre = $wp_theatre;
 
