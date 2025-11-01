@@ -27,14 +27,13 @@ class WPT_Test_TimeHandling extends WPT_UnitTestCase {
         $dt_local = new DateTimeImmutable( $local, new DateTimeZone( 'Europe/Amsterdam' ) );
         $utc_expected = $dt_local->setTimezone( new DateTimeZone( 'UTC' ) )->getTimestamp();
 
-        if ( class_exists( 'Theater_Helpers_Time' ) && method_exists( 'Theater_Helpers_Time', 'get_utc_timestamp_from_local_string' ) ) {
+            if ( ! class_exists( 'Theater_Helpers_Time' ) ) {
+                $this->markTestSkipped( 'Theater_Helpers_Time is not available in this branch.' );
+            }
+
             // If the refactor is present, the helper should match DateTimeZone conversion.
             $utc_helper = Theater_Helpers_Time::get_utc_timestamp_from_local_string( $local );
             $this->assertEquals( $utc_expected, $utc_helper, 'Helper should match DateTimeZone conversion.' );
-        } else {
-            // Otherwise just assert we produced a valid UTC timestamp via DateTime.
-            $this->assertIsInt( $utc_expected );
-        }
     }
 
     /**
@@ -61,14 +60,26 @@ class WPT_Test_TimeHandling extends WPT_UnitTestCase {
     // Legacy naive calculation (replicates the old code path)
     $naive = strtotime( $local, current_time( 'timestamp' ) ) - ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS );
 
-        if ( class_exists( 'Theater_Helpers_Time' ) && method_exists( 'Theater_Helpers_Time', 'get_utc_timestamp_from_local_string' ) ) {
-            // If the helper exists we expect the legacy naive computation to differ from the correct conversion.
-            $this->assertNotEquals( $naive, $utc_expected, 'Naive fixed-offset conversion should differ from DST-aware conversion during DST transitions.' );
-        } else {
-            // If the helper is not present (older branch), still assert that the naive conversion differs from
-            // DateTime's DST-aware conversion. This documents the bug on old branches.
-            $this->assertNotEquals( $naive, $utc_expected, 'On branches without the refactor the naive conversion should differ from DST-aware conversion.' );
-        }
+            if ( ! class_exists( 'Theater_Helpers_Time' ) ) {
+                $this->markTestSkipped( 'Theater_Helpers_Time is not available in this branch.' );
+            }
+
+            // Confirm the helper round-trips: local -> UTC -> local yields the original local timestamp.
+            $samples = array(
+                '2025-07-01 12:00:00',
+                '2025-10-26 02:30:00',
+            );
+
+            foreach ( $samples as $local ) {
+                $utc = Theater_Helpers_Time::get_utc_timestamp_from_local_string( $local );
+                $back = Theater_Helpers_Time::get_local_timestamp_from_utc( $utc );
+
+                // Convert the original local string to a timestamp in the site's timezone for comparison.
+                $dt_local = new DateTimeImmutable( $local, new DateTimeZone( 'Europe/Amsterdam' ) );
+                $expected_local_timestamp = (int) $dt_local->getTimestamp();
+
+                $this->assertEquals( $expected_local_timestamp, $back, "Local timestamp for {$local} should round-trip correctly" );
+            }
     }
 
 }
