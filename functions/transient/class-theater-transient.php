@@ -224,6 +224,7 @@ class Theater_Transient {
 	 * Registers the transient in the list of Theater transients that are in use.
 	 *
 	 * @since	0.15.24
+	 * @since	0.18.9	Ensures the registry option is saved with autoload disabled.
 	 *
 	 * @uses	Theater_Transients::get_transient_keys() to get all Theater transients that are in use.
 	 * @uses	Theater_Transient::key to get the key of the current transient.
@@ -232,8 +233,8 @@ class Theater_Transient {
 	function register() {
 		$transient_keys = Theater_Transients::get_transient_keys();
 		$transient_keys[] = $this->key;
-		$transient_keys = array_unique( $transient_keys );
-		update_option( THEATER_TRANSIENTS_OPTION, $transient_keys, true );
+		$transient_keys = array_values( array_unique( $transient_keys ) );
+		update_option( THEATER_TRANSIENTS_OPTION, $transient_keys, false );
 	}
 
 	/**
@@ -303,15 +304,14 @@ class Theater_Transient {
 	 * Unregisters the transient from the list of Theater transients that are in use.
 	 *
 	 * @since	0.15.24
+	 * @since	0.18.9	Delegates storage updates to Theater_Transients::remove_transient_key().
 	 *
 	 * @uses	Theater_Transients::get_transient_keys() to get all Theater transients that are in use.
 	 * @uses	Theater_Transient::key to get the key of the current transient.
 	 * @return 	void
 	 */
 	private function unregister() {
-		$transient_keys = Theater_Transients::get_transient_keys();
-		$transient_keys = array_diff( $transient_keys, array( $this->key ) );
-		update_option( THEATER_TRANSIENTS_OPTION, $transient_keys, true );
+		Theater_Transients::remove_transient_key( $this->key );
 	}
 
 

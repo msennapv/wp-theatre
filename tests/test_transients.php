@@ -211,6 +211,48 @@ class WPT_Test_Transients extends WPT_UnitTestCase {
 		remove_filter( 'theater/transient/expiration', '__return_zero', 10 );
 	}
 	
+
+	/**
+	 * Confirms that expired transient rows are removed automatically.
+	 */
+	function test_expired_transients_accumulate_without_access() {
+		$callback = function () {
+			return 1; // one second lifetime.
+		};
+
+		add_filter( 'theater/transient/expiration', $callback, 10, 2 );
+
+		$transient_keys = array();
+
+		try {
+			for ( $i = 0; $i < 3; $i++ ) {
+				$args      = array( 'token' => uniqid( 'pileup_', true ) );
+				$transient = new Theater_Transient( 'pileup', $args );
+				$transient->set( 'cached' );
+				$transient_keys[] = $transient->calculate_key( 'pileup', $args );
+			}
+		} finally {
+			remove_filter( 'theater/transient/expiration', $callback, 10 );
+		}
+
+		// Mark all transients as expired without touching them.
+		foreach ( $transient_keys as $key ) {
+			update_option( '_transient_timeout_' . $key, time() - HOUR_IN_SECONDS );
+		}
+
+		// Expired transients should be cleaned up automatically.
+		foreach ( $transient_keys as $key ) {
+			$this->assertFalse(
+				get_option( '_transient_' . $key ),
+				'Expected transient value to be removed automatically once expired.'
+			);
+			$this->assertFalse(
+				get_option( '_transient_timeout_' . $key ),
+				'Expected transient timeout to be removed automatically once expired.'
+			);
+		}
+	}
+	
 	function test_transients_are_off_for_logged_in_users() {
 		$this->setup_test_data();
 
