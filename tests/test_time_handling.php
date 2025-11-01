@@ -47,13 +47,19 @@ class WPT_Test_TimeHandling extends WPT_UnitTestCase {
     public function test_naive_fixed_offset_differs_from_helper() {
         update_option( 'timezone_string', 'Europe/Amsterdam' );
 
-        $local = '2025-10-26 02:30:00';
+    // Use a summer date where Europe/Amsterdam has UTC+2 (DST) so we can force a mismatch
+    // by storing a numeric gmt_offset that does not account for DST.
+    $local = '2025-07-01 12:00:00';
         // DST-aware expected value via DateTimeZone.
         $dt_local = new DateTimeImmutable( $local, new DateTimeZone( 'Europe/Amsterdam' ) );
         $utc_expected = $dt_local->setTimezone( new DateTimeZone( 'UTC' ) )->getTimestamp();
 
-        // Legacy naive calculation (replicates the old code path)
-        $naive = strtotime( $local, current_time( 'timestamp' ) ) - ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS );
+    // Force the legacy numeric gmt_offset to a value that does NOT include DST (e.g. +1).
+    // This reproduces older installations that only stored a numeric offset.
+    update_option( 'gmt_offset', '1' );
+
+    // Legacy naive calculation (replicates the old code path)
+    $naive = strtotime( $local, current_time( 'timestamp' ) ) - ( get_option( 'gmt_offset' ) * HOUR_IN_SECONDS );
 
         if ( class_exists( 'Theater_Helpers_Time' ) && method_exists( 'Theater_Helpers_Time', 'get_utc_timestamp_from_local_string' ) ) {
             // If the helper exists we expect the legacy naive computation to differ from the correct conversion.
