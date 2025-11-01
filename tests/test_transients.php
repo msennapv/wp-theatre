@@ -191,6 +191,17 @@ class WPT_Test_Transients extends WPT_UnitTestCase {
 		$actual = Theater_Transients::get_transient_keys();
 		$this->assertEmpty( $actual );
 	}
+
+	function test_transient_is_not_cached_when_expiration_is_zero() {
+		add_filter( 'theater/transient/expiration', '__return_zero', 10, 2 );
+
+		$transient = new Theater_Transient( 'test', array( 'id' => uniqid( 'transient_', true ) ) );
+
+		$this->assertFalse( $transient->set( 'should-not-cache' ) );
+		$this->assertFalse( $transient->get() );
+
+		remove_filter( 'theater/transient/expiration', '__return_zero', 10 );
+	}
 	
 	function test_transients_are_off_for_logged_in_users() {
 		$this->setup_test_data();
