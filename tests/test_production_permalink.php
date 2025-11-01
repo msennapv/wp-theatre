@@ -103,5 +103,46 @@ class WPT_Test_Production_Permalink extends WP_UnitTestCase {
 
 		$this->assertEquals($expected, $returned);		
 	}
+
+	function test_save_settings_requires_capability() {
+		global $wp_theatre;
+
+		$original_base = $wp_theatre->production_permalink->get_base();
+
+		$_POST['wpt_production_permalink_base'] = 'custom';
+		$_POST['wpt_production_permalink_custom_base'] = 'pwned';
+
+		wp_set_current_user( 0 );
+
+		$wp_theatre->production_permalink->save_settings();
+
+		$this->assertEquals( $original_base, $wp_theatre->production_permalink->get_base() );
+
+		unset( $_POST['wpt_production_permalink_base'] );
+		unset( $_POST['wpt_production_permalink_custom_base'] );
+	}
+
+	function test_save_settings_updates_when_authorized() {
+		global $wp_theatre;
+
+		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+
+		$_POST['wpt_production_permalink_base'] = 'custom';
+		$_POST['wpt_production_permalink_custom_base'] = 'pwned';
+		$_POST['_wpnonce'] = wp_create_nonce( 'update-permalink' );
+		$_REQUEST['_wpnonce'] = $_POST['_wpnonce'];
+
+		$wp_theatre->production_permalink->save_settings();
+
+		$this->assertEquals( '/pwned', $wp_theatre->production_permalink->get_base() );
+
+		$wp_theatre->production_permalink->save_base( 'production' );
+
+		unset( $_POST['wpt_production_permalink_base'] );
+		unset( $_POST['wpt_production_permalink_custom_base'] );
+		unset( $_POST['_wpnonce'] );
+		unset( $_REQUEST['_wpnonce'] );
+	}
 	
 }
