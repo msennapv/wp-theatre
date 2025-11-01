@@ -117,7 +117,7 @@
 		
 		add_filter('wpt_production_template_default', $func);
 		
-		$this->assertContains('test content', do_shortcode('[wpt_productions]'));
+		$this->assertStringContainsString('test content', do_shortcode('[wpt_productions]'));
 	}
 	
 	function test_shortcode_wpt_productions_filter_season() {
@@ -183,7 +183,7 @@
 		
 		$html = do_shortcode('[wpt_productions]{{title}}{{director}}[/wpt_productions]');
 
-		$this->assertContains($director,$html);
+		$this->assertStringContainsString($director,$html);
 
 		$this->assertEquals(5, substr_count($html, 'wp_theatre_prod_director'));		
 	}
@@ -199,7 +199,7 @@
 		
 		$html = do_shortcode('[wpt_productions]{{title}}{{director|permalink}}[/wpt_productions]');
 
-		$this->assertContains($director,$html);
+		$this->assertStringContainsString($director,$html);
 
 		$this->assertEquals(1, substr_count($html, 'wp_theatre_prod_director"><a'));		
 	}
@@ -470,7 +470,7 @@
 		$html = do_shortcode('[wpt_productions groupby="month" post__in="'.$production_with_two_months.'"]');
 		
 		$this->assertEquals(2, substr_count($html, '<h3 class="wpt_listing_group month">'), $html);		
-		$this->assertContains('<h3 class="wpt_listing_group month">'.date_i18n('F',$in_two_months_date).'</h3>', $html);
+		$this->assertStringContainsString('<h3 class="wpt_listing_group month">'.date_i18n('F',$in_two_months_date).'</h3>', $html);
 		$this->assertEquals(2, substr_count($html, '"wp_theatre_prod"'));
 	}
 	
@@ -500,7 +500,7 @@
 		$html = do_shortcode('[wpt_productions groupby="year" post__in="'.$production_with_two_years.'"]');
 		
 		$this->assertEquals(2, substr_count($html, '<h3 class="wpt_listing_group year">'));		
-		$this->assertContains('<h3 class="wpt_listing_group year">'.date_i18n('Y',$in_two_years_date).'</h3>', $html);
+		$this->assertStringContainsString('<h3 class="wpt_listing_group year">'.date_i18n('Y',$in_two_years_date).'</h3>', $html);
 		$this->assertEquals(2, substr_count($html, '"wp_theatre_prod"'));
 	}
 	

@@ -102,10 +102,10 @@ class WPT_Test_Template extends WP_UnitTestCase {
 		wp_delete_attachment($attachment_id, true);
 		
 		$expected = '<figure><img ';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 		$expected = 'src="'.$img_url.'" class="';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 	    remove_theme_support( 'post-thumbnails' );		
 	}
@@ -141,10 +141,10 @@ class WPT_Test_Template extends WP_UnitTestCase {
 		wp_delete_attachment($attachment_id, true);
 		
 		$expected = '<figure><img ';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 		$expected = 'src="'.$img_url.'" class="';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 
 	    remove_theme_support( 'post-thumbnails' );		
 	}
@@ -196,7 +196,7 @@ class WPT_Test_Template extends WP_UnitTestCase {
 		$expected = 'wp-post-image" alt="Post thumbnail alt text"';
 		$actual = $template->get_merged();
 		
-		$this->assertContains($expected, $actual);			
+		$this->assertStringContainsString($expected, $actual);			
 	}
 
 	function test_template_placeholder_filter_date() {

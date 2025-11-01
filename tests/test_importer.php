@@ -9,6 +9,24 @@ class WPT_Demo_Importer extends WPT_Importer {
 	 */
 	protected $feed = array();
 
+	/**
+	 * Gets the current demo feed.
+	 *
+	 * @return array
+	 */
+	public function get_feed() {
+		return $this->feed;
+	}
+
+	/**
+	 * Replaces the demo feed with a new set of entries.
+	 *
+	 * @param array $feed Feed entries.
+	 */
+	public function set_feed( $feed ) {
+		$this->feed = $feed;
+	}
+
 	function __construct() {
 		global $wp_theatre;
 
@@ -239,7 +257,9 @@ class WPT_Test_Importer extends WP_UnitTestCase {
 		$importer->execute();
 
 		// remove an event from the feed.
-		array_shift( $importer->feed );
+		$feed = $importer->get_feed();
+		array_shift( $feed );
+		$importer->set_feed( $feed );
 
 		$importer->execute();
 
@@ -345,7 +365,7 @@ class WPT_Test_Importer extends WP_UnitTestCase {
 		$actual = $importer->stats['errors'];
 		$expected = $error;
 		
-		$this->assertContains($expected, $actual);
+		$this->assertContains( $expected, $actual );
 	}
 	
 	
@@ -359,7 +379,7 @@ class WPT_Test_Importer extends WP_UnitTestCase {
 		$importer = new WPT_Demo_Importer();
 
 		// Store the originals feed (with only 4 events).
-		$feed_small = $importer->feed;
+		$feed_small = $importer->get_feed();
 		
 		// Replace feed with 30 events.
 		$feed_large = array(
@@ -368,7 +388,7 @@ class WPT_Test_Importer extends WP_UnitTestCase {
 		for($i=2;$i<30;$i++) {
 			$feed_large[] = array('Today + '.$i.' days');
 		}
-		$importer->feed = $feed_large;
+		$importer->set_feed( $feed_large );
 
 		// Import the 30 events
 		$importer->execute();
@@ -377,7 +397,7 @@ class WPT_Test_Importer extends WP_UnitTestCase {
 		$this->assertCount(30, $events);
 		
 		// Import again, but with the originals feed.
-		$importer->feed = $feed_small;
+		$importer->set_feed( $feed_small );
 		$importer->execute();
 		$this->publish_all();
 		$events = $wp_theatre->events->get();
@@ -416,7 +436,7 @@ class WPT_Test_Importer extends WP_UnitTestCase {
 		$production = new WPT_Production($production_id);
 		$actual = $production->html($production_html_args);
 		$expected = 'Changed content';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 		$importer->execute_reimport($production_id);
 
@@ -427,11 +447,11 @@ class WPT_Test_Importer extends WP_UnitTestCase {
 
 		// Test if original content title is back.
 		$expected = 'Supercool stuff';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 
 		// Test if original production title is back.
 		$expected = 'Production 0';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 	}
 
@@ -510,7 +530,7 @@ class WPT_Test_Importer extends WP_UnitTestCase {
 		$production = new WPT_Production($production_id);
 		$actual = $production->html($production_html_args);
 		$expected = 'Changed content';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 		$importer->execute_reimport($production_id);
 
@@ -521,11 +541,11 @@ class WPT_Test_Importer extends WP_UnitTestCase {
 
 		// Test if original content title is back.
 		$expected = 'Supercool stuff';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 
 		// Test if alternate production title is set.
 		$expected = 'Boring show 123';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 	}
 	
@@ -537,10 +557,10 @@ class WPT_Test_Importer extends WP_UnitTestCase {
 
 		$actual = do_shortcode('[wpt_events]');
 
-		$importer->feed = array(
+		$importer->set_feed( array(
 			array( 'tomorrow', 'tomorrow + 1 day' ),
 			array( 'next year' ),
-		);
+		) );
 		$importer->execute();
 
 		$expected = do_shortcode('[wpt_events]');
@@ -565,7 +585,8 @@ class WPT_Test_Importer extends WP_UnitTestCase {
 		$this->assertFalse( $actual );
 		
 		$production_refs = array();
-		for ( $p = 0; $p < count( $importer->feed );$p++ ) {
+		$feed = $importer->get_feed();
+		for ( $p = 0; $p < count( $feed );$p++ ) {
 			$production_refs[] = 'demo_'.$p;
 		}
 		
@@ -596,9 +617,10 @@ class WPT_Test_Importer extends WP_UnitTestCase {
 		$this->assertFalse( $actual );
 		
 		$event_refs = array();
-		for ( $p = 0; $p < count( $importer->feed );$p++ ) {
+		$feed = $importer->get_feed();
+		for ( $p = 0; $p < count( $feed );$p++ ) {
 			$production_ref = 'demo_'.$p;
-			for ( $e = 0;$e < count( $importer->feed[ $p ] );$e++ ) {
+			for ( $e = 0;$e < count( $feed[ $p ] );$e++ ) {
 				$event_refs[] = $production_ref.'_'.$e;
 			}
 		}

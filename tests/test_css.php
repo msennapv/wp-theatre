@@ -24,7 +24,7 @@ class WPT_Test_CSS extends WPT_UnitTestCase {
 		$actual = ob_get_clean();
 		$expected = '.wpt-test { background-color: red; }';
 		
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 
 	}
 	
@@ -90,7 +90,7 @@ class WPT_Test_CSS extends WPT_UnitTestCase {
 		$actual = ob_get_clean();
 		$expected = 'custom_css';
 
-		$this->assertNotContains($expected, $actual);
+		$this->assertStringNotContainsString($expected, $actual);
 	}
 	
 	

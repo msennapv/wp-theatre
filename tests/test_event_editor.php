@@ -62,7 +62,7 @@ class WPT_Test_Event_Editor extends WP_UnitTestCase {
 		$meta_boxes = ob_get_contents();
 		ob_end_clean();
 
-		$this->assertContains( $create_html, $meta_boxes );
+		$this->assertStringContainsString( $create_html, $meta_boxes );
 	}
 
 	function test_listing_html_is_displayed_on_production_page() {
@@ -81,7 +81,7 @@ class WPT_Test_Event_Editor extends WP_UnitTestCase {
 		$meta_boxes = ob_get_contents();
 		ob_end_clean();
 
-		$this->assertContains( $listing_html, $meta_boxes );
+		$this->assertStringContainsString( $listing_html, $meta_boxes );
 	}
 
 	function test_edit_form_is_displayed_on_event_page() {
@@ -102,7 +102,7 @@ class WPT_Test_Event_Editor extends WP_UnitTestCase {
 		$meta_boxes = ob_get_contents();
 		ob_end_clean();
 
-		$this->assertContains( $edit_form_html, $meta_boxes );
+		$this->assertStringContainsString( $edit_form_html, $meta_boxes );
 	}
 
 	function test_event_is_created_on_production_page() {
@@ -178,7 +178,7 @@ class WPT_Test_Event_Editor extends WP_UnitTestCase {
 
 		// There should be a hidden input on the form with the production_id.
 		$form_html = $this->wp_theatre->event_editor->get_form_html( $production_id, $event_id );
-		$this->assertContains( '<input type="hidden" id="wpt_event_editor_'.WPT_Production::post_type_name.'" name="wpt_event_editor_'.WPT_Production::post_type_name.'" value="'.$production_id.'" />', $form_html );
+		$this->assertStringContainsString( '<input type="hidden" id="wpt_event_editor_'.WPT_Production::post_type_name.'" name="wpt_event_editor_'.WPT_Production::post_type_name.'" value="'.$production_id.'" />', $form_html );
 	}
 
 	function test_2nd_event_is_created_on_production_page() {
@@ -274,7 +274,7 @@ class WPT_Test_Event_Editor extends WP_UnitTestCase {
 
 		$html = $this->wp_theatre->event_editor->get_listing_html( $production_id );
 
-		$this->assertContains( '<tr data-event_id="'.$event_id.'">', $html );
+		$this->assertStringContainsString( '<tr data-event_id="'.$event_id.'">', $html );
 
 	}
 	/**
@@ -299,7 +299,7 @@ class WPT_Test_Event_Editor extends WP_UnitTestCase {
 		$actual = ob_get_contents();
 		ob_end_clean();
 
-		$this->assertContains( $expected, $actual );
+		$this->assertStringContainsString( $expected, $actual );
 		
 	}
 }

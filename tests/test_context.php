@@ -120,7 +120,7 @@ class WPT_Test_Context extends WPT_UnitTestCase {
 		$actual = do_shortcode('[wpt_events]');
 		$expected = 'wpt_context_default';
 		
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 	}
 
@@ -129,7 +129,7 @@ class WPT_Test_Context extends WPT_UnitTestCase {
 		$actual = do_shortcode('[wpt_production_events production="'.$this->production_with_upcoming_events.'"]');
 		$expected = 'wpt_context_production_events';
 		
-		$this->assertContains($expected, $actual);		
+		$this->assertStringContainsString($expected, $actual);		
 		
 	}
 
@@ -138,7 +138,7 @@ class WPT_Test_Context extends WPT_UnitTestCase {
 		$actual = do_shortcode('[wpt_events context="custom"]');
 		$expected = 'wpt_context_custom';
 		
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 	}
 
@@ -154,7 +154,7 @@ class WPT_Test_Context extends WPT_UnitTestCase {
 		$actual = do_shortcode('[wpt_events]');
 		$expected = '<div class="wrap">';
 		
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 
 
 	}
@@ -169,7 +169,7 @@ class WPT_Test_Context extends WPT_UnitTestCase {
 		$actual = do_shortcode('[wpt_production_events production="'.$this->production_with_upcoming_events.'"]');
 		$expected = '<div class="wrap">';
 		
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 	}
 	
@@ -183,7 +183,7 @@ class WPT_Test_Context extends WPT_UnitTestCase {
 		$actual = do_shortcode('[wpt_events context="custom"]');
 		$expected = '<div class="wrap">';
 		
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 	}
 	
@@ -197,7 +197,7 @@ class WPT_Test_Context extends WPT_UnitTestCase {
 		$actual = do_shortcode('[wpt_production_events production="'.$this->production_with_upcoming_events.'"]');
 		$expected = '<div class="wrap">';
 		
-		$this->assertNotContains($expected, $actual);
+		$this->assertStringNotContainsString($expected, $actual);
 		
 	}
 
@@ -206,7 +206,7 @@ class WPT_Test_Context extends WPT_UnitTestCase {
 		$actual = do_shortcode('[wpt_productions]');
 		$expected = 'wpt_context_default';
 		
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 	}
 
@@ -215,7 +215,7 @@ class WPT_Test_Context extends WPT_UnitTestCase {
 		$actual = do_shortcode('[wpt_productions context="custom"]');
 		$expected = 'wpt_context_custom';
 		
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 	}
 
@@ -231,7 +231,7 @@ class WPT_Test_Context extends WPT_UnitTestCase {
 		$actual = do_shortcode('[wpt_productions]');
 		$expected = '<div class="wrap">';
 		
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 
 
 	}
@@ -246,7 +246,7 @@ class WPT_Test_Context extends WPT_UnitTestCase {
 		$actual = do_shortcode('[wpt_productions context="custom"]');
 		$expected = '<div class="wrap">';
 		
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 	}
 	
@@ -260,7 +260,7 @@ class WPT_Test_Context extends WPT_UnitTestCase {
 		$actual = do_shortcode('[wpt_productions context="custom"]');
 		$expected = '<div class="wrap">';
 		
-		$this->assertNotContains($expected, $actual);
+		$this->assertStringNotContainsString($expected, $actual);
 	}
 	
 	function test_production_title_filter_for_custom_context() {
@@ -273,7 +273,7 @@ class WPT_Test_Context extends WPT_UnitTestCase {
 		$actual = do_shortcode('[wpt_productions context="custom"]');
 		$expected = 'Custom title';
 		
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 	}
 	
 }
