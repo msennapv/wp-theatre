@@ -33,7 +33,7 @@ class WPT_Test_CSS extends WPT_UnitTestCase {
 		global $wp_theatre;
 		
 		if (!function_exists( 'wp_update_custom_css_post' )) {
-			return;
+			$this->markTestSkipped('Custom CSS post API introduced in WordPress 4.7.');
 		}
 		
 		$options = array(
@@ -52,36 +52,12 @@ class WPT_Test_CSS extends WPT_UnitTestCase {
 		
 	}
 
-	function test_css_admin_field_is_loaded_wp_46_and_before() {
-		global $wp_theatre;
-		
-		if (function_exists( 'wp_update_custom_css_post' )) {
-			return;
-		}
-		
-		$options = array(
-			'custom_css' => '.wpt-test { background-color: red; }',
-		);
-		
-		add_option( 'wpt_style', $options );
-		do_action('admin_init');
-		
-		ob_start();
-		do_settings_fields( 'wpt_style', 'display_section_id' ); 
-
-		$actual = ob_get_clean();
-		$expected = '<textarea id="wpt_custom_css" name="wpt_style[custom_css]">.wpt-test { background-color: red; }</textarea>';	
-
-		$this->assertContains($expected, $actual);
-
-	}
-	
 	function test_css_admin_field_is_not_loaded_wp_47_and_up() {
-		
-		global $wp_theatre;
+			
+			global $wp_theatre;
 		
 		if (!function_exists( 'wp_update_custom_css_post' )) {
-			return;
+			$this->markTestSkipped('Custom CSS post API not available.');
 		}
 
 		/** 

@@ -244,10 +244,6 @@ class WPT_Test_Listing_Page extends WPT_UnitTestCase {
 		
 	}
 	
-	function test_events_are_paginated_by_week_on_listing_page() {
-		
-	}
-	
 	function test_events_are_paginated_by_month_on_listing_page() {
 		$this->options['listing_page_type'] = WPT_Event::post_type_name;
 		$this->options['listing_page_nav'] = 'paginated';
@@ -388,10 +384,6 @@ class WPT_Test_Listing_Page extends WPT_UnitTestCase {
 		
 	}
 	
-	function test_events_are_grouped_by_week_on_listing_page() {
-		
-	}
-	
 	function test_events_are_grouped_by_month_on_listing_page() {
 		$this->options['listing_page_type'] = WPT_Event::post_type_name;
 		$this->options['listing_page_nav'] = 'grouped';
@@ -404,10 +396,6 @@ class WPT_Test_Listing_Page extends WPT_UnitTestCase {
 
 		$html= get_echo( 'the_content' );
 		$this->assertContains('"wpt_listing_group month"', $html);
-	}
-	
-	function test_events_are_grouped_by_year_on_listing_page() {
-		
 	}
 	
 	function test_productions_are_grouped_by_season_on_listing_page() {

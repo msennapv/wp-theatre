@@ -752,18 +752,6 @@ class WPT_Test extends WPT_UnitTestCase {
 	}
 	
 			
-	// Tags
-	function test_tag_archive() {
-		return;
-		
-		// how do I test the output of a tag archive page?
-		$args = array(
-			'tag' => 'historic',
-			'posts_per_page' => -1
-		);
-		$this->assertCount(2,get_posts($args));
-	}
-	
 	// Test RSS feeds
 	function test_upcoming_productions_feed() {
 		$this->assertEquals(4, substr_count($this->wp_theatre->feeds->get_upcoming_productions(), '<item'));
@@ -1055,27 +1043,6 @@ class WPT_Test extends WPT_UnitTestCase {
 
 		$expected = '<div class="'.WPT_Event::post_type_name.'_date '.WPT_Event::post_type_name.'_enddate"></div>';
 		$this->assertContains($expected, $html);						
-	}
-	
-	/**
-	 * Tests if deprecated WPT_Event::date() and WPT_Event::time() still work.
-	 * Not running now, because I need to figure out how to suppress the deprecated notices.
-	 * See: https://unit-tests.trac.wordpress.org/ticket/142
-	 */
-	function test_deprecated_event_date_and_time() {
-		return;
-		
-		$event = new WPT_Event($this->upcoming_event_with_prices);
-
-		$this->assertEquals($event->date(), $event->startdate());		
-		$this->assertEquals($event->date(array('html'=>'true')), $event->startdate_html());		
-		$this->assertEquals($event->time(), $event->starttime());		
-		$this->assertEquals($event->time(array('html'=>'true')), $event->starttime_html());		
-
-		$this->assertEquals($event->date(array('start'=>false)), $event->enddate());		
-		$this->assertEquals($event->date(array('html'=>'true', 'start'=>false)), $event->enddate_html());		
-		$this->assertEquals($event->time(array('start'=>false)), $event->endtime());		
-		$this->assertEquals($event->time(array('html'=>'true', 'start'=>false)), $event->endtime_html());		
 	}
 	
 	function test_tickets_button_disappears_at_right_time() {
