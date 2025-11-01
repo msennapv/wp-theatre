@@ -284,7 +284,11 @@
 			if (empty($error)) {
 				$error = 'Undefined error.';
 			}
-			$this->stats['errors'][] = $error;				
+			if ( ! isset( $this->stats['errors'] ) || ! is_array( $this->stats['errors'] ) ) {
+				$this->stats['errors'] = array();
+			}
+			$this->stats['errors'][] = $error;
+			$this->set( 'stats', $this->stats );
 		}
 
 		/**
@@ -537,6 +541,9 @@
 		}
 
 		public function __get( $key ) {
+			if ( property_exists( $this, $key ) ) {
+				return $this->$key;
+			}
 			return $this->get( $key );
 		}
 		
@@ -1136,7 +1143,8 @@
 		 * @return void
 		 */
 		private function save_stats() {
-			update_option($this->get('slug').'_stats', $this->get('stats') );
+			$this->set( 'stats', $this->stats );
+			update_option( $this->get( 'slug' ).'_stats', $this->stats );
 		}
 		
 		/**

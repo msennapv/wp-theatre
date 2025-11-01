@@ -1,4 +1,5 @@
 <?php
+#[AllowDynamicProperties]
 class WPT_Production {
 
 	const post_type_name = 'wp_theatre_prod';

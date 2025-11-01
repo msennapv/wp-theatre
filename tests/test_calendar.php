@@ -17,7 +17,7 @@ class WPT_Test_Calendar extends WPT_UnitTestCase {
 		$this->setup_test_data();
 		$actual = do_shortcode('[wpt_calendar]');
 		$expected = '<div class="wpt_calendar"><table class="wpt_month active">';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 
 	}
 
@@ -54,11 +54,11 @@ class WPT_Test_Calendar extends WPT_UnitTestCase {
 
 		// Check if first month is no active.
 		$expected = '<div class="wpt_calendar"><table class="wpt_month">';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 		// Check if another month is active.
 		$expected = '<table class="wpt_month active">';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 	}
 	
@@ -95,11 +95,11 @@ class WPT_Test_Calendar extends WPT_UnitTestCase {
 
 		// Check if first month is no active.
 		$expected = '<div class="wpt_calendar"><table class="wpt_month">';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 		// Check if another month is active.
 		$expected = '<table class="wpt_month active">';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 	}
 

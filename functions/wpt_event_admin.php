@@ -49,11 +49,15 @@ class WPT_Event_Admin {
 	public function add_production_to_event_editor($fields, $event_id) {
 		
 		$current_screen = get_current_screen();
+		$should_add_field = false;
 		
-		if (
-			! is_null($current_screen) &&
-			(WPT_Event::post_type_name == $current_screen->id)
-		) {
+		if ( ! is_null( $current_screen ) && WPT_Event::post_type_name == $current_screen->id ) {
+			$should_add_field = true;
+		} elseif ( $event_id && WPT_Event::post_type_name === get_post_type( $event_id ) ) {
+			$should_add_field = true;
+		}
+		
+		if ( $should_add_field ) {
 			array_unshift(
 				$fields,
 				array(
@@ -63,7 +67,7 @@ class WPT_Event_Admin {
 						'callback' => array($this, 'get_control_production_html'),
 					),
 				)
-			);				
+			);			
 		}
 		
 		return $fields;

@@ -110,7 +110,6 @@ class WP_Theatre {
 		
 		// Deprecated properties
 		$this->order = new WPT_Order();
-		Theater_Custom_CSS::init();
 		$this->cart = new WPT_Cart();		
 		
 		// Options
@@ -205,7 +204,6 @@ class WP_Theatre {
 		
 		require_once(dirname(__FILE__) . '/functions/deprecated/wpt_cart.php');	
 		require_once(dirname(__FILE__) . '/functions/deprecated/class-wpt-order.php');
-		require_once(dirname(__FILE__) . '/functions/deprecated/class-theater-custom-css.php');
 		
 	}
 	
