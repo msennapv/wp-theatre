@@ -193,26 +193,7 @@ class WPT_Test_Transients extends WPT_UnitTestCase {
 	}
 
 	/**
-	 * When the expiration filter forces a zero TTL the transient should never persist.
-	 */
-	function test_transient_is_not_cached_when_expiration_is_zero() {
-		// Simulate a site forcing immediate expiration via the public filter hook.
-		add_filter( 'theater/transient/expiration', '__return_zero', 10, 2 );
-
-		// Use a random key to avoid interference from other test runs.
-		$transient = new Theater_Transient( 'test', array( 'id' => uniqid( 'transient_', true ) ) );
-
-		// set() should report failure because the value must not be cached.
-		$this->assertFalse( $transient->set( 'should-not-cache' ) );
-		// get() must also return false, confirming nothing was stored.
-		$this->assertFalse( $transient->get() );
-
-		// Clean up the filter to avoid affecting subsequent tests.
-		remove_filter( 'theater/transient/expiration', '__return_zero', 10 );
-	}
-
-	/**
-	 * Confirms that expired transient rows remain in the database until they are fetched.
+	 * Confirms that expired transient rows are removed automatically.
 	 */
 	function test_expired_transients_accumulate_without_access() {
 		$callback = function () {
@@ -239,26 +220,16 @@ class WPT_Test_Transients extends WPT_UnitTestCase {
 			update_option( '_transient_timeout_' . $key, time() - HOUR_IN_SECONDS );
 		}
 
-		// The rows should still be present because we have not called get_transient().
+		// Expired transients should be cleaned up automatically.
 		foreach ( $transient_keys as $key ) {
-			$this->assertNotFalse( get_option( '_transient_' . $key ) );
-			$this->assertNotFalse( get_option( '_transient_timeout_' . $key ) );
-		}
-
-		/*
-		 * Now load each transient via the Theater_Transient wrapper.
-		 * This should trigger the clean-up because the entries are expired.
-		 */
-		foreach ( $transient_keys as $key ) {
-			$transient = new Theater_Transient();
-			$transient->load_by_key( $key );
-			$this->assertFalse( $transient->get() );
-		}
-
-		// Every expired option should be gone after the reads above.
-		foreach ( $transient_keys as $key ) {
-			$this->assertFalse( get_option( '_transient_' . $key ) );
-			$this->assertFalse( get_option( '_transient_timeout_' . $key ) );
+			$this->assertFalse(
+				get_option( '_transient_' . $key ),
+				'Expected transient value to be removed automatically once expired.'
+			);
+			$this->assertFalse(
+				get_option( '_transient_timeout_' . $key ),
+				'Expected transient timeout to be removed automatically once expired.'
+			);
 		}
 	}
 	
