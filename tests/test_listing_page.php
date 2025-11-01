@@ -6,14 +6,24 @@
  * @group 	listing_page
  * @since	0.?
  */
-class WPT_Test_Listing_Page extends WP_UnitTestCase {
+class WPT_Test_Listing_Page extends WPT_UnitTestCase {
 
-	function setUp() {
-		global $wp_rewrite; 
-		global $wp_theatre;
-		
+	/**
+	 * Plugin instance under test.
+	 *
+	 * @var WP_Theatre
+	 */
+	protected $wp_theatre;
+
+	/** @var array */
+	protected $options = array();
+
+	protected function setUp(): void {
+        global $wp_rewrite; 
+        global $wp_theatre;
+
 		parent::setUp();
-		
+
 		$this->wp_theatre = $wp_theatre;
 		
 		// create a page for our listing
@@ -234,10 +244,6 @@ class WPT_Test_Listing_Page extends WP_UnitTestCase {
 		
 	}
 	
-	function test_events_are_paginated_by_week_on_listing_page() {
-		
-	}
-	
 	function test_events_are_paginated_by_month_on_listing_page() {
 		$this->options['listing_page_type'] = WPT_Event::post_type_name;
 		$this->options['listing_page_nav'] = 'paginated';
@@ -258,7 +264,7 @@ class WPT_Test_Listing_Page extends WP_UnitTestCase {
 		$html = get_echo( 'the_content' );
 
 		$this->assertEquals(1, substr_count($html, '"wpt_listing_filter_pagination month"'), $html);
-		$this->assertContains('"wp_theatre_event"', $html);
+		$this->assertStringContainsString('"wp_theatre_event"', $html);
 	}
 	
 	function test_events_are_paginated_by_year_on_listing_page() {
@@ -281,7 +287,7 @@ class WPT_Test_Listing_Page extends WP_UnitTestCase {
 		$html = get_echo( 'the_content' );
 
 		$this->assertEquals(1, substr_count($html, '"wpt_listing_filter_pagination year"'), $html);
-		$this->assertContains('"wp_theatre_event"', $html);
+		$this->assertStringContainsString('"wp_theatre_event"', $html);
 		
 	}
 	
@@ -378,10 +384,6 @@ class WPT_Test_Listing_Page extends WP_UnitTestCase {
 		
 	}
 	
-	function test_events_are_grouped_by_week_on_listing_page() {
-		
-	}
-	
 	function test_events_are_grouped_by_month_on_listing_page() {
 		$this->options['listing_page_type'] = WPT_Event::post_type_name;
 		$this->options['listing_page_nav'] = 'grouped';
@@ -393,11 +395,7 @@ class WPT_Test_Listing_Page extends WP_UnitTestCase {
 		);
 
 		$html= get_echo( 'the_content' );
-		$this->assertContains('"wpt_listing_group month"', $html);
-	}
-	
-	function test_events_are_grouped_by_year_on_listing_page() {
-		
+		$this->assertStringContainsString('"wpt_listing_group month"', $html);
 	}
 	
 	function test_productions_are_grouped_by_season_on_listing_page() {
@@ -513,7 +511,7 @@ class WPT_Test_Listing_Page extends WP_UnitTestCase {
 		$this->assertEquals(1, substr_count($html, 'wpt_listing_filter_active"><a'));
 
 		// Are the filtered events shown?
-		$this->assertContains('"wp_theatre_event"',$html);
+		$this->assertStringContainsString('"wp_theatre_event"',$html);
 	}
 	
 	function test_events_are_filtered_by_year_on_listing_page() {
@@ -537,7 +535,7 @@ class WPT_Test_Listing_Page extends WP_UnitTestCase {
 		$this->assertEquals(1, substr_count($html, 'wpt_listing_filter_active"><a'));
 
 		// Are the filtered events shown?
-		$this->assertContains('"wp_theatre_event"',$html);
+		$this->assertStringContainsString('"wp_theatre_event"',$html);
 		
 	}
 	
@@ -782,7 +780,7 @@ class WPT_Test_Listing_Page extends WP_UnitTestCase {
 
 		$html = get_echo( 'the_content' );
 
-        $this->assertContains('template!', $html, $html);			
+        $this->assertStringContainsString('template!', $html, $html);			
 	}
 	
 	function test_events_on_production_page_with_custom_heading() {
@@ -886,7 +884,7 @@ class WPT_Test_Listing_Page extends WP_UnitTestCase {
 		
 		$html = get_echo( 'the_content' );
 
-		$this->assertContains($month_url, $html);
+		$this->assertStringContainsString($month_url, $html);
 		
 	}
 	
@@ -914,7 +912,7 @@ class WPT_Test_Listing_Page extends WP_UnitTestCase {
 		$actual = ob_get_clean();
 		$expected = '<ul class="wpt_categories"><li class="film">';
 		
-		$this->assertContains( $expected, $actual );
+		$this->assertStringContainsString( $expected, $actual );
 		
 	}
 	

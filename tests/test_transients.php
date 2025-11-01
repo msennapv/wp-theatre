@@ -116,14 +116,14 @@ class WPT_Test_Transients extends WPT_UnitTestCase {
 		 */
 		$wp_query->query_vars['wpt_category'] = 'film';
 		$html = do_shortcode('[wpt_events paginateby=category]');
-		$this->assertContains('category-film wpt_listing_filter_active',$html);
+		$this->assertStringContainsString('category-film wpt_listing_filter_active',$html);
 
 		/*
 		 * Test if the muziek tab is active.
 		 */
 		$wp_query->query_vars['wpt_category'] = 'muziek';
 		$html = do_shortcode('[wpt_events paginateby=category]');
-		$this->assertContains('category-muziek wpt_listing_filter_active',$html);
+		$this->assertStringContainsString('category-muziek wpt_listing_filter_active',$html);
 	}
 	
 	/**
@@ -296,14 +296,14 @@ class WPT_Test_Transients extends WPT_UnitTestCase {
 		 */
 		$wp_query->query_vars['wpt_category'] = 'film';
 		$html = do_shortcode('[wpt_productions paginateby=category]');
-		$this->assertContains('category-film wpt_listing_filter_active',$html);
+		$this->assertStringContainsString('category-film wpt_listing_filter_active',$html);
 
 		/*
 		 * Test if the muziek tab is active.
 		 */
 		$wp_query->query_vars['wpt_category'] = 'muziek';
 		$html = do_shortcode('[wpt_productions paginateby=category]');
-		$this->assertContains('category-muziek wpt_listing_filter_active',$html);
+		$this->assertStringContainsString('category-muziek wpt_listing_filter_active',$html);
 	}
 	
 	function test_if_corrupted_list_of_transients_is_emptied() {
