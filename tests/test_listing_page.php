@@ -6,14 +6,24 @@
  * @group 	listing_page
  * @since	0.?
  */
-class WPT_Test_Listing_Page extends WP_UnitTestCase {
+class WPT_Test_Listing_Page extends WPT_UnitTestCase {
+
+	/**
+	 * Plugin instance under test.
+	 *
+	 * @var WP_Theatre
+	 */
+	protected $wp_theatre;
+
+	/** @var array */
+	protected $options = array();
 
 	protected function setUp(): void {
-		global $wp_rewrite; 
-		global $wp_theatre;
-		
+        global $wp_rewrite; 
+        global $wp_theatre;
+
 		parent::setUp();
-		
+
 		$this->wp_theatre = $wp_theatre;
 		
 		// create a page for our listing

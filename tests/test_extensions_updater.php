@@ -2,6 +2,13 @@
 
 class WPT_Test_Extensions_Updater extends WP_UnitTestCase {
 
+	/**
+	 * Plugin instance under test.
+	 *
+	 * @var WP_Theatre
+	 */
+	protected $wp_theatre;
+
 	protected function setUp(): void {
 		global $wp_theatre;
 		$this->wp_theatre = $wp_theatre;

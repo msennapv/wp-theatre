@@ -6,6 +6,50 @@
 
 class WPT_UnitTestCase extends WP_UnitTestCase {
 
+	/**
+	 * Cached Theatre plugin instance.
+	 *
+	 * @var WP_Theatre|null
+	 */
+	protected $wp_theatre;
+
+	/**
+	 * Saved listing page options for tests.
+	 *
+	 * @var array
+	 */
+	protected $options = array();
+
+	/** @var int|null */
+	protected $season1;
+
+	/** @var int|null */
+	protected $season2;
+
+	/** @var int|null */
+	protected $category_muziek;
+
+	/** @var int|null */
+	protected $category_film;
+
+	/** @var int|null */
+	protected $production_with_upcoming_event;
+
+	/** @var int|null */
+	protected $upcoming_event_with_prices;
+
+	/** @var int|null */
+	protected $production_with_upcoming_events;
+
+	/** @var int|null */
+	protected $production_with_historic_event;
+
+	/** @var int|null */
+	protected $production_with_historic_event_sticky;
+
+	/** @var int|null */
+	protected $production_with_upcoming_and_historic_events;
+
 	protected function setUp(): void {
 		global $wp_rewrite;
 

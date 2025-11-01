@@ -41,20 +41,20 @@ class WPT_Test_Event_Order extends WPT_UnitTestCase {
 		$this->setup_test_data();
 
 		// create production with upcoming event
-		$this->event_in_3_days = $this->factory->post->create(
+		$event_in_3_days = $this->factory->post->create(
 			array(
 				'post_type' => WPT_Production::post_type_name,
 			)
 		);
 
-		$this->event_date_in_3_days = $this->factory->post->create(
+		$event_date_in_3_days = $this->factory->post->create(
 			array(
 				'post_type' => WPT_Event::post_type_name,
 			)
 		);
 
-		add_post_meta( $this->event_date_in_3_days, WPT_Production::post_type_name, $this->event_in_3_days );
-		add_post_meta( $this->event_date_in_3_days, 'event_date', date( 'Y-m-d H:i:s', time() + (3 * DAY_IN_SECONDS) ) );
+		add_post_meta( $event_date_in_3_days, WPT_Production::post_type_name, $event_in_3_days );
+		add_post_meta( $event_date_in_3_days, 'event_date', date( 'Y-m-d H:i:s', time() + (3 * DAY_IN_SECONDS) ) );
 
 		$events = $wp_theatre->productions->get();
 
@@ -65,7 +65,7 @@ class WPT_Test_Event_Order extends WPT_UnitTestCase {
 			$this->production_with_historic_event, // - 1 day
 			$this->production_with_upcoming_events, // + 1 day
 			$this->production_with_upcoming_event, // + 2 days
-			$this->event_in_3_days, // + 3 days
+			$event_in_3_days, // + 3 days
 			$this->production_with_upcoming_and_historic_events, // 1 week
 		);
 

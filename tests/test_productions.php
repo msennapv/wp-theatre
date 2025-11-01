@@ -1,7 +1,7 @@
 <?php
 	
 	
-	class WPT_Test_Production extends WP_UnitTestCase {
+	class WPT_Test_Production extends WPT_UnitTestCase {
 
 	protected function setUp(): void {
 		global $wp_theatre;

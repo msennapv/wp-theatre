@@ -2,6 +2,12 @@
 <?php
 
 class WPT_Demo_Importer extends WPT_Importer {
+	/**
+	 * Demo feed entries.
+	 *
+	 * @var array
+	 */
+	protected $feed = array();
 
 	function __construct() {
 		global $wp_theatre;
@@ -133,6 +139,13 @@ class WPT_Demo_Importer extends WPT_Importer {
  * @group	importer
  */
 class WPT_Test_Importer extends WP_UnitTestCase {
+
+	/**
+	 * Plugin instance under test.
+	 *
+	 * @var WP_Theatre
+	 */
+	protected $wp_theatre;
 
 	protected function setUp(): void {
 		global $wp_theatre;
@@ -601,5 +614,3 @@ class WPT_Test_Importer extends WP_UnitTestCase {
 		
 	}
 }
-
-
