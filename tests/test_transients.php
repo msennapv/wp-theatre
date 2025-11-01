@@ -191,6 +191,76 @@ class WPT_Test_Transients extends WPT_UnitTestCase {
 		$actual = Theater_Transients::get_transient_keys();
 		$this->assertEmpty( $actual );
 	}
+
+	/**
+	 * When the expiration filter forces a zero TTL the transient should never persist.
+	 */
+	function test_transient_is_not_cached_when_expiration_is_zero() {
+		// Simulate a site forcing immediate expiration via the public filter hook.
+		add_filter( 'theater/transient/expiration', '__return_zero', 10, 2 );
+
+		// Use a random key to avoid interference from other test runs.
+		$transient = new Theater_Transient( 'test', array( 'id' => uniqid( 'transient_', true ) ) );
+
+		// set() should report failure because the value must not be cached.
+		$this->assertFalse( $transient->set( 'should-not-cache' ) );
+		// get() must also return false, confirming nothing was stored.
+		$this->assertFalse( $transient->get() );
+
+		// Clean up the filter to avoid affecting subsequent tests.
+		remove_filter( 'theater/transient/expiration', '__return_zero', 10 );
+	}
+
+	/**
+	 * Confirms that expired transient rows remain in the database until they are fetched.
+	 */
+	function test_expired_transients_accumulate_without_access() {
+		$callback = function () {
+			return 1; // one second lifetime.
+		};
+
+		add_filter( 'theater/transient/expiration', $callback, 10, 2 );
+
+		$transient_keys = array();
+
+		try {
+			for ( $i = 0; $i < 3; $i++ ) {
+				$args      = array( 'token' => uniqid( 'pileup_', true ) );
+				$transient = new Theater_Transient( 'pileup', $args );
+				$transient->set( 'cached' );
+				$transient_keys[] = $transient->calculate_key( 'pileup', $args );
+			}
+		} finally {
+			remove_filter( 'theater/transient/expiration', $callback, 10 );
+		}
+
+		// Mark all transients as expired without touching them.
+		foreach ( $transient_keys as $key ) {
+			update_option( '_transient_timeout_' . $key, time() - HOUR_IN_SECONDS );
+		}
+
+		// The rows should still be present because we have not called get_transient().
+		foreach ( $transient_keys as $key ) {
+			$this->assertNotFalse( get_option( '_transient_' . $key ) );
+			$this->assertNotFalse( get_option( '_transient_timeout_' . $key ) );
+		}
+
+		/*
+		 * Now load each transient via the Theater_Transient wrapper.
+		 * This should trigger the clean-up because the entries are expired.
+		 */
+		foreach ( $transient_keys as $key ) {
+			$transient = new Theater_Transient();
+			$transient->load_by_key( $key );
+			$this->assertFalse( $transient->get() );
+		}
+
+		// Every expired option should be gone after the reads above.
+		foreach ( $transient_keys as $key ) {
+			$this->assertFalse( get_option( '_transient_' . $key ) );
+			$this->assertFalse( get_option( '_transient_timeout_' . $key ) );
+		}
+	}
 	
 	function test_transients_are_off_for_logged_in_users() {
 		$this->setup_test_data();
