@@ -620,6 +620,7 @@ class WPT_Frontend {
 	 * @since 	0.?
 	 * @since	0.14.4	Use the [wpt_events] shortcode to render the output.
 	 * @since	0.14.7	Added support for filtered shortcode atts.
+	 * @since	0.18.9	Sanitizes shortcode attributes before forwarding them to [wpt_events].
 	 *
 	 * @param 	array	$atts		The shortcode attributes.
 	 * @param 	string	$template 	The template. Default <null>.
@@ -646,13 +647,28 @@ class WPT_Frontend {
 			$template = '{{remark}}{{datetime}}{{location}}{{tickets}}';
 		}
 
-		$shortcode_atts = '';
+		$sanitized_atts = array();
+
+		// Sanitize every attribute before reusing it in the nested events shortcode.
 		foreach ( $atts as $key => $value ) {
-			$shortcode_atts .= $key.'="'.$value.'" ';
+			if ( false === $value || null === $value ) {
+				continue;
+			}
+
+			$sanitized_key = sanitize_key( $key );
+
+			if ( '' === $sanitized_key ) {
+				continue;
+			}
+
+			if ( is_array( $value ) ) {
+				$value = implode( ',', $value );
+			}
+
+			$sanitized_atts[ $sanitized_key ] = sanitize_text_field( (string) $value );
 		}
 
-		$shortcode = '[wpt_events '.$shortcode_atts.']'.$template.'[/wpt_events]';
-		return do_shortcode( $shortcode );
+		return $this->wpt_events( $sanitized_atts, $template );
 	}
 
 	function wpt_event_ticket_button( $atts, $content = null ) {
