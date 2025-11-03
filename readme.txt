@@ -137,6 +137,21 @@ The new feature may be added directly to the Theater plugin or as an extension s
 
 == Changelog ==
 
+= 0.19 =
+
+Release Date: November 4, 2025
+
+* Enhancements
+    * Hardened transients so listings stay fresh on busy sites.
+* Bugfix
+    * Sanitizes forwarded shortcode attributes in `[wpt_production_events]` to block XSS payloads from reaching nested `[wpt_events]` output.
+    * Ensures importer errors are always recorded and saved so integrators can diagnose feed issues reliably.
+    * Requires valid nonces and capabilities before saving custom production permalinks, preventing unauthorized permalink changes.
+    * Restores the original publication status when productions or events are untrashed, keeping revived content visible without extra clicks.
+    * Fixes PHP 8.2 warnings across Theater models.
+* Deprecations
+    * Removed the long-abandoned custom CSS manager, simplifying legacy code paths.
+
 = 0.18 =
 
 Release Date: September 1, 2020
