@@ -1,13 +1,13 @@
 <?php
 class WPT_Test_Production_Permalink extends WP_UnitTestCase {
 
-	function setUp() {
+	protected function setUp(): void {
 		global $wp_theatre;
 
 		unset($wp_theatre->production_permalink->options);
 		
 		parent::setUp();
-		
+
 	}
 
 	function activate_pretty_permalinks() {

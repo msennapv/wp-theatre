@@ -1,8 +1,8 @@
 <?php
 
-class WPT_Test extends WP_UnitTestCase {
+class WPT_Test extends WPT_UnitTestCase {
 
-	function setUp() {
+	protected function setUp(): void {
 		global $wp_theatre;
 		
 		parent::setUp();
@@ -99,7 +99,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 	}
 
-	function tearDown() {
+	protected function tearDown(): void {
 		parent::tearDown();
 		 wp_set_current_user( 0 );
 	}
@@ -229,7 +229,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		add_filter('wpt_event_template_default', $func);
 		
-		$this->assertContains('test content', do_shortcode('[wpt_events]'));
+		$this->assertStringContainsString('test content', do_shortcode('[wpt_events]'));
 	}
 	
 	function test_shortcode_wpt_events_default_template_filter() {
@@ -240,7 +240,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		add_filter('wpt/events/event/template/default', $func);
 		
-		$this->assertContains('test content', do_shortcode('[wpt_events]'));
+		$this->assertStringContainsString('test content', do_shortcode('[wpt_events]'));
 	}
 	
 	function test_shortcode_wpt_events_event_html_filter() {
@@ -253,7 +253,7 @@ class WPT_Test extends WP_UnitTestCase {
 		$expected = '<div class="wpt_listing wpt_context_default wpt_events"><wrap>';
 		$actual = do_shortcode('[wpt_events]');
 		
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 	}
 	
 	function test_shortcode_wpt_events_magic_dates() {
@@ -347,7 +347,7 @@ class WPT_Test extends WP_UnitTestCase {
 		 */
 		$link = '<a href="'.get_permalink($this->production_with_upcoming_events).'">';
 		$output = do_shortcode('[wpt_events limit=1]');
-		$this->assertContains($link,$output);
+		$this->assertStringContainsString($link,$output);
 
 		/*
 		 * Descending.
@@ -355,7 +355,7 @@ class WPT_Test extends WP_UnitTestCase {
 		 */
 		$link = '<a href="'.get_permalink($this->production_with_upcoming_and_historic_events).'">';
 		$output = do_shortcode('[wpt_events limit=1 order=desc]');
-		$this->assertContains($link,$output);
+		$this->assertStringContainsString($link,$output);
 
 	}
 	
@@ -383,7 +383,7 @@ class WPT_Test extends WP_UnitTestCase {
 		$link = '<a href="'.get_permalink($this->production_with_upcoming_event).'">';
 		$output = do_shortcode('[wpt_events]{{location|permalink}}[/wpt_events]');
 
-		$this->assertContains($link,$output);
+		$this->assertStringContainsString($link,$output);
 	}
 	
 	function test_wpt_events_template_date_filter() {
@@ -395,7 +395,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$output = do_shortcode('[wpt_events]{{datetime|date("'.$date_format.'")|permalink}}[/wpt_events]');
 		
-		$this->assertContains($formatted_date, $output);
+		$this->assertStringContainsString($formatted_date, $output);
 	}
 	
 	function test_wpt_events_with_post_args() {
@@ -446,7 +446,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$html = do_shortcode('[wpt_events]{{title}}{{director}}[/wpt_events]');
 
-		$this->assertContains($director,$html);
+		$this->assertStringContainsString($director,$html);
 
 		$this->assertEquals(4, substr_count($html, 'wp_theatre_event_director'), $html);		
 		$this->assertEquals(1, substr_count($html, $director), $html);		
@@ -517,7 +517,7 @@ class WPT_Test extends WP_UnitTestCase {
 			'html' => true,
 		);
 		$html = $event->tickets($args);
-		$this->assertContains('new status', $event->tickets($args));
+		$this->assertStringContainsString('new status', $event->tickets($args));
 	}
 	
 	
@@ -541,7 +541,7 @@ class WPT_Test extends WP_UnitTestCase {
 
 		
 		$event = new WPT_Event($this->upcoming_event_with_prices);
-		$this->assertContains('tickets url', $event->tickets());
+		$this->assertStringContainsString('tickets url', $event->tickets());
 	}
 	
 	function test_wpt_event_tickets_html_filter() {
@@ -554,7 +554,7 @@ class WPT_Test extends WP_UnitTestCase {
 		add_filter( 'wpt_event_tickets_html', $func, 10 , 2 );
 		
 		$event = new WPT_Event($this->upcoming_event_with_prices);
-		$this->assertContains('tickets button', $event->tickets(array('html'=>true)));
+		$this->assertStringContainsString('tickets button', $event->tickets(array('html'=>true)));
 	}
 	
 	function test_wpt_event_tickets_url() {
@@ -582,7 +582,7 @@ class WPT_Test extends WP_UnitTestCase {
 		$html = do_shortcode('[wpt_events]');
 		
 		$this->assertEquals(1, substr_count($html, 'wp_theatre_integrationtype_iframe'));			
-		$this->assertNotContains('http://slimndap.com', $html);
+		$this->assertStringNotContainsString('http://slimndap.com', $html);
 	}
 	
 	function test_tickets_iframe_is_on_ticket_page() {
@@ -614,7 +614,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$expected = '<iframe src="http://slimndap.com" class="wp_theatre_iframe"></iframe>';
 		
-		$this->assertContains( $expected, $actual );
+		$this->assertStringContainsString( $expected, $actual );
 		
 	}
 		
@@ -723,8 +723,8 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$html = do_shortcode('[wpt_events end="now"]');
 
-		$this->assertNotContains('wp_theatre_event_prices',$html);
-		$this->assertNotContains('wp_theatre_event_tickets_status',$html);
+		$this->assertStringNotContainsString('wp_theatre_event_prices',$html);
+		$this->assertStringNotContainsString('wp_theatre_event_tickets_status',$html);
 		
 	}
 	
@@ -752,18 +752,6 @@ class WPT_Test extends WP_UnitTestCase {
 	}
 	
 			
-	// Tags
-	function test_tag_archive() {
-		return;
-		
-		// how do I test the output of a tag archive page?
-		$args = array(
-			'tag' => 'historic',
-			'posts_per_page' => -1
-		);
-		$this->assertCount(2,get_posts($args));
-	}
-	
 	// Test RSS feeds
 	function test_upcoming_productions_feed() {
 		$this->assertEquals(4, substr_count($this->wp_theatre->feeds->get_upcoming_productions(), '<item'));
@@ -808,7 +796,7 @@ class WPT_Test extends WP_UnitTestCase {
 		$html = do_shortcode('[wpt_events groupby="month"]');
 		
 		// should contain 'wpt_listing_group month'.
-		$this->assertContains('<h3 class="wpt_listing_group month">'.date_i18n('F',$event_date).'</h3>', $html);
+		$this->assertStringContainsString('<h3 class="wpt_listing_group month">'.date_i18n('F',$event_date).'</h3>', $html);
 		
 		//should show the same number of events as 'wpt_events' (4) + the new event.
 		$this->assertEquals(5, substr_count($html, '"wp_theatre_event"'));
@@ -872,7 +860,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$html = do_shortcode('[wpt_events paginateby=month]');
 		
-		$this->assertContains('filtered_name', $html);
+		$this->assertStringContainsString('filtered_name', $html);
 	}
 	
 	function test_wpt_listing_filter_pagination_month_option_name_filter() {
@@ -884,7 +872,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$html = do_shortcode('[wpt_events paginateby=month]');
 		
-		$this->assertContains('filtered_name', $html);
+		$this->assertStringContainsString('filtered_name', $html);
 	}
 	
 	function test_wpt_listing_filter_pagination_option_url_filter() {
@@ -896,7 +884,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$html = do_shortcode('[wpt_events paginateby=month]');
 		
-		$this->assertContains('filtered_url', $html);
+		$this->assertStringContainsString('filtered_url', $html);
 	}
 	
 	function test_wpt_listing_filter_pagination_month_option_url_filter() {
@@ -908,7 +896,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$html = do_shortcode('[wpt_events paginateby=month]');
 		
-		$this->assertContains('filtered_url', $html);
+		$this->assertStringContainsString('filtered_url', $html);
 	}
 	
 	function test_wpt_listing_filter_pagination_option_html_filter() {
@@ -920,7 +908,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$html = do_shortcode('[wpt_events paginateby=month]');
 		
-		$this->assertContains('filtered_html', $html);
+		$this->assertStringContainsString('filtered_html', $html);
 	}
 	
 	function test_wpt_listing_filter_pagination_month_option_html_filter() {
@@ -932,7 +920,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$html = do_shortcode('[wpt_events paginateby=month]');
 		
-		$this->assertContains('filtered_html', $html);
+		$this->assertStringContainsString('filtered_html', $html);
 	}
 	
 	
@@ -1019,7 +1007,7 @@ class WPT_Test extends WP_UnitTestCase {
 						)
 		);
 		
-		$this->assertContains($expected, $html);
+		$this->assertStringContainsString($expected, $html);
 	}
 		
 	
@@ -1032,7 +1020,7 @@ class WPT_Test extends WP_UnitTestCase {
 		$event = new WPT_Event($this->upcoming_event_with_prices);
 		$expected = date_i18n( get_option( 'time_format' ),	strtotime( $enddate) );
 		
-		$this->assertContains($expected, $html);				
+		$this->assertStringContainsString($expected, $html);				
 	}
 	
 	/**
@@ -1043,7 +1031,7 @@ class WPT_Test extends WP_UnitTestCase {
 		$html = do_shortcode('[wpt_events]{{endtime}}[/wpt_events]');
 
 		$expected = '<div class="'.WPT_Event::post_type_name.'_time '.WPT_Event::post_type_name.'_endtime"></div>';
-		$this->assertContains($expected, $html);						
+		$this->assertStringContainsString($expected, $html);						
 	}
 	
 	/**
@@ -1054,28 +1042,7 @@ class WPT_Test extends WP_UnitTestCase {
 		$html = do_shortcode('[wpt_events]{{enddate}}[/wpt_events]');
 
 		$expected = '<div class="'.WPT_Event::post_type_name.'_date '.WPT_Event::post_type_name.'_enddate"></div>';
-		$this->assertContains($expected, $html);						
-	}
-	
-	/**
-	 * Tests if deprecated WPT_Event::date() and WPT_Event::time() still work.
-	 * Not running now, because I need to figure out how to suppress the deprecated notices.
-	 * See: https://unit-tests.trac.wordpress.org/ticket/142
-	 */
-	function test_deprecated_event_date_and_time() {
-		return;
-		
-		$event = new WPT_Event($this->upcoming_event_with_prices);
-
-		$this->assertEquals($event->date(), $event->startdate());		
-		$this->assertEquals($event->date(array('html'=>'true')), $event->startdate_html());		
-		$this->assertEquals($event->time(), $event->starttime());		
-		$this->assertEquals($event->time(array('html'=>'true')), $event->starttime_html());		
-
-		$this->assertEquals($event->date(array('start'=>false)), $event->enddate());		
-		$this->assertEquals($event->date(array('html'=>'true', 'start'=>false)), $event->enddate_html());		
-		$this->assertEquals($event->time(array('start'=>false)), $event->endtime());		
-		$this->assertEquals($event->time(array('html'=>'true', 'start'=>false)), $event->endtime_html());		
+		$this->assertStringContainsString($expected, $html);						
 	}
 	
 	function test_tickets_button_disappears_at_right_time() {
@@ -1180,7 +1147,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$expected = 'Production in 50 minutes';
 		$actual = do_shortcode('[wpt_events]');
-		$this->assertContains( $expected, $actual);
+		$this->assertStringContainsString( $expected, $actual);
 		
 	}
 	
@@ -1214,7 +1181,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$expected = date_i18n( get_option('date_format'), strtotime((date('Y')+1).'-12-31'));
 		$actual = $event->startdate();
-		$this->assertContains( $expected, $actual);
+		$this->assertStringContainsString( $expected, $actual);
 
 	}
 	
@@ -1247,7 +1214,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$expected = '<h3 class="wpt_listing_group day">'.date_i18n( 'l d F',strtotime((date('Y')+1).'-12-31'));
 		$actual = do_shortcode('[wpt_events groupby=day start="'.(date('Y')+1).'-12-31"]');
-		$this->assertContains( $expected, $actual);
+		$this->assertStringContainsString( $expected, $actual);
 		
 	}
 	
@@ -1280,7 +1247,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$expected = '<h3 class="wpt_listing_group month">'.date_i18n( 'F',strtotime((date('Y')+1).'-12-31'));
 		$actual = do_shortcode('[wpt_events groupby=month start="'.(date('Y')+1).'-12-31"]');
-		$this->assertContains( $expected, $actual);
+		$this->assertStringContainsString( $expected, $actual);
 		
 	}
 	
@@ -1314,7 +1281,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$expected = '<h3 class="wpt_listing_group year">'.date_i18n( 'Y',strtotime((date('Y')+1).'-12-31'));
 		$actual = do_shortcode('[wpt_events groupby=year start="'.(date('Y')+1).'-12-31"]');
-		$this->assertContains( $expected, $actual);
+		$this->assertStringContainsString( $expected, $actual);
 		
 	}
 	
@@ -1378,7 +1345,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$expected = '<h3 class="wpt_listing_group day">'.date_i18n( 'l d F',strtotime((date('Y')+1).'-12-31'));
 		$actual = do_shortcode('[wpt_productions groupby=day start="'.(date('Y')+1).'-12-31"]');
-		$this->assertContains( $expected, $actual);
+		$this->assertStringContainsString( $expected, $actual);
 		
 	}
 	
@@ -1411,7 +1378,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$expected = '<h3 class="wpt_listing_group month">'.date_i18n( 'F',strtotime((date('Y')+1).'-12-31'));
 		$actual = do_shortcode('[wpt_productions groupby=month start="'.(date('Y')+1).'-12-31"]');
-		$this->assertContains( $expected, $actual);
+		$this->assertStringContainsString( $expected, $actual);
 		
 	}
 	
@@ -1444,7 +1411,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$expected = '<h3 class="wpt_listing_group year">'.date_i18n( 'Y',strtotime((date('Y')+1).'-12-31'));
 		$actual = do_shortcode('[wpt_productions groupby=year start="'.(date('Y')+1).'-12-31"]');
-		$this->assertContains( $expected, $actual);
+		$this->assertStringContainsString( $expected, $actual);
 			
 	}
 
@@ -1478,7 +1445,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$expected = date_i18n( 'Y-m-d', strtotime((date('Y')+1).'-12-31'));
 		$actual = do_shortcode('[wpt_events]{{startdate|date(\'Y-m-d\')}}[/wpt_events]');
-		$this->assertContains( $expected, $actual);
+		$this->assertStringContainsString( $expected, $actual);
 
 	}
 	
@@ -1513,7 +1480,7 @@ class WPT_Test extends WP_UnitTestCase {
 		
 		$expected = 'wp_theatre_event_starttime">3:59';
 		$actual = do_shortcode('[wpt_events]{{starttime|date(\'G:i\')}}[/wpt_events]');
-		$this->assertContains( $expected, $actual);
+		$this->assertStringContainsString( $expected, $actual);
 
 	}
 	

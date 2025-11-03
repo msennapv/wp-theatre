@@ -3,3 +3,5 @@ config.codekit
 .idea
 apidocs
 wordpress.org
+vendor
+.phpunit.result.cache
