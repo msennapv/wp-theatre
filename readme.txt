@@ -147,6 +147,7 @@ Release Date: November 4, 2025
     * Sanitizes forwarded shortcode attributes in `[wpt_production_events]` to block XSS payloads from reaching nested `[wpt_events]` output.
     * Ensures importer errors are always recorded and saved so integrators can diagnose feed issues reliably.
     * Requires valid nonces and capabilities before saving custom production permalinks, preventing unauthorized permalink changes.
+    * Adds the missing `$event` context to the `wpt/event/template/field/value` filter so custom templates keep receiving the right data.
     * Restores the original publication status when productions or events are untrashed, keeping revived content visible without extra clicks.
     * Fixes PHP 8.2 warnings across Theater models.
 * Deprecations
