@@ -103,7 +103,7 @@ class WPT_Event_Template extends WPT_Template {
 		 * Filter the value for an event field.
 		 *
 		 * @since	0.12.1
-		 * @since	0.18.9 Added the $event parameter to the filter.
+		 * @since	0.19 	Added the $event parameter to the filter.
 		 * @param	string		$value		The value.
 		 * @param	string		$field		The field.
 		 * @param	array		$args		Arguments for the field (optional).
