@@ -95,7 +95,7 @@ class WPT_Production_Permalink {
 	 * Save the production permalink settings.
 	 *
 	 * @since	0.12
-	 * @since	0.18.9	Require manage_options capability and the permalink nonce before saving.
+	 * @since	0.19	Require manage_options capability and the permalink nonce before saving.
 	 * @return 	void
 	 */
 	public function save_settings() {

@@ -484,7 +484,7 @@
 		 * For Theatre productions and events we want to reinstate the status they had before
 		 * moving to the trash so listings pick them up again.
 		 *
-		 * @since 0.18.9
+		 * @since 0.19
 		 *
 		 * @param string $new_status      The status WordPress plans to apply.
 		 * @param int    $post_id         The post being untrashed.

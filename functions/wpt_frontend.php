@@ -620,7 +620,7 @@ class WPT_Frontend {
 	 * @since 	0.?
 	 * @since	0.14.4	Use the [wpt_events] shortcode to render the output.
 	 * @since	0.14.7	Added support for filtered shortcode atts.
-	 * @since	0.18.9	Sanitizes shortcode attributes before forwarding them to [wpt_events].
+	 * @since	0.19	Sanitizes shortcode attributes before forwarding them to [wpt_events].
 	 *
 	 * @param 	array	$atts		The shortcode attributes.
 	 * @param 	string	$template 	The template. Default <null>.

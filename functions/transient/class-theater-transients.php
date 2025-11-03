@@ -97,7 +97,7 @@ class Theater_Transients {
 	/**
 	 * Removes a transient key from the registry.
 	 *
-	 * @since 0.18.9
+	 * @since 0.19
 	 *
 	 * @param string $transient_key The transient key to remove.
 	 * @return void
@@ -121,7 +121,7 @@ class Theater_Transients {
 	/**
 	 * Deletes expired Theater transients and unregisters them.
 	 *
-	 * @since 0.18.9
+	 * @since 0.19
 	 *
 	 * @param string $option    Option name being updated.
 	 * @param mixed  $old_value Previous option value.
@@ -160,7 +160,7 @@ class Theater_Transients {
 	/**
 	 * Gets metadata for all registered Theater transients.
 	 *
-	 * @since	0.18.9
+	 * @since	0.19
 	 *
 	 * @return array
 	 */
@@ -177,7 +177,7 @@ class Theater_Transients {
 	/**
 	 * Gets metadata for a specific Theater transient.
 	 *
-	 * @since	0.18.9
+	 * @since	0.19
 	 *
 	 * @param	string	$key	The transient key.
 	 * @return	array|null
@@ -195,7 +195,7 @@ class Theater_Transients {
 	/**
 	 * Updates metadata for a specific Theater transient.
 	 *
-	 * @since	0.18.9
+	 * @since	0.19
 	 *
 	 * @param	string	$key		The transient key.
 	 * @param	array	$metadata	The metadata to store.
@@ -215,7 +215,7 @@ class Theater_Transients {
 	/**
 	 * Deletes metadata for a specific Theater transient.
 	 *
-	 * @since	0.18.9
+	 * @since	0.19
 	 *
 	 * @param	string	$key	The transient key.
 	 * @return	void
@@ -251,7 +251,7 @@ class Theater_Transients {
 	/**
 	 * Ensures the storage option exists and is not autoloaded.
 	 *
-	 * @since 0.18.9
+	 * @since 0.19
 	 * @return void
 	 */
 	private static function ensure_storage_initialized() {

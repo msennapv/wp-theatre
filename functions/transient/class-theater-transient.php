@@ -69,7 +69,7 @@ class Theater_Transient {
 	 * Gets the transient value.
 	 *
 	 * @since	0.15.24
-	 * @since	0.18.9	Validates cached metadata and enforces runtime expiration checks.
+	 * @since	0.19	Validates cached metadata and enforces runtime expiration checks.
 	 *
 	 * @uses	Theater_Transient::is_active() to check if the use of transients is active.
 	 *
@@ -128,7 +128,7 @@ class Theater_Transient {
 	 * Gets the expiration of this transient.
 	 *
 	 * @since	0.15.24
-	 * @since	0.18.9	Normalises invalid filter results back to the default expiration.
+	 * @since	0.19	Normalises invalid filter results back to the default expiration.
 	 * @return	int		The expiration of this transient.
 	 */
 	function get_expiration() {
@@ -224,7 +224,7 @@ class Theater_Transient {
 	 * Registers the transient in the list of Theater transients that are in use.
 	 *
 	 * @since	0.15.24
-	 * @since	0.18.9	Ensures the registry option is saved with autoload disabled.
+	 * @since	0.19	Ensures the registry option is saved with autoload disabled.
 	 *
 	 * @uses	Theater_Transients::get_transient_keys() to get all Theater transients that are in use.
 	 * @uses	Theater_Transient::key to get the key of the current transient.
@@ -241,7 +241,7 @@ class Theater_Transient {
 	 * Resets the transient.
 	 *
 	 * @since	0.15.24
-	 * @since	0.18.9	Also clears the metadata store.
+	 * @since	0.19	Also clears the metadata store.
 	 *
 	 * @uses 	Theater_Transient::unregister() to remove the transient from the list of Theater transients that
 	 *			are in use.
@@ -262,7 +262,7 @@ class Theater_Transient {
 	 * Sets the transient value.
 	 *
 	 * @since	0.15.24
-	 * @since	0.18.9	Adds runtime guard for zero expiration and stores metadata.
+	 * @since	0.19	Adds runtime guard for zero expiration and stores metadata.
 	 *
 	 * @uses	Theater_Transient::is_active() to check if the use of transients is active.
 	 *
@@ -304,7 +304,7 @@ class Theater_Transient {
 	 * Unregisters the transient from the list of Theater transients that are in use.
 	 *
 	 * @since	0.15.24
-	 * @since	0.18.9	Delegates storage updates to Theater_Transients::remove_transient_key().
+	 * @since	0.19	Delegates storage updates to Theater_Transients::remove_transient_key().
 	 *
 	 * @uses	Theater_Transients::get_transient_keys() to get all Theater transients that are in use.
 	 * @uses	Theater_Transient::key to get the key of the current transient.
