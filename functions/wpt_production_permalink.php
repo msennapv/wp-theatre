@@ -95,6 +95,7 @@ class WPT_Production_Permalink {
 	 * Save the production permalink settings.
 	 *
 	 * @since	0.12
+	 * @since	0.19	Require manage_options capability and the permalink nonce before saving.
 	 * @return 	void
 	 */
 	public function save_settings() {
@@ -107,10 +108,22 @@ class WPT_Production_Permalink {
 			return;
 		}
 
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		if ( empty( $_POST['_wpnonce'] ) ) {
+			return;
+		}
+
+		// Match the core nonce used on the permalink settings screen.
+		check_admin_referer( 'update-permalink' );
+
 		$base = sanitize_text_field( $_POST['wpt_production_permalink_base'] );
 
 		if ( 'custom' == $base ) {
-			$base = sanitize_text_field( $_POST['wpt_production_permalink_custom_base'] );
+			$custom_base = isset( $_POST['wpt_production_permalink_custom_base'] ) ? $_POST['wpt_production_permalink_custom_base'] : '';
+			$base = sanitize_text_field( $custom_base );
 		}
 
 		$this->save_base( $base );

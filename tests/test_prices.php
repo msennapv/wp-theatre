@@ -27,7 +27,7 @@ class WPT_Test_Pricess extends WPT_UnitTestCase {
 		$args = array(
 			'html' => true,
 		);
-		$this->assertContains( 'tickets prices', $event->tickets( $args ) );
+		$this->assertStringContainsString( 'tickets prices', $event->tickets( $args ) );
 	}
 
 	function test_wpt_event_tickets_prices_summary() {
@@ -36,7 +36,7 @@ class WPT_Test_Pricess extends WPT_UnitTestCase {
 		$args = array(
 			'summary' => true,
 		);
-		$this->assertContains( '8.50', $event->prices( $args ) );
+		$this->assertStringContainsString( '8.50', $event->prices( $args ) );
 	}
 
 	/**
@@ -78,7 +78,7 @@ class WPT_Test_Pricess extends WPT_UnitTestCase {
 		$actual = $production->prices_html();
 		$expected = 'from&nbsp;5.00';
 
-		$this->assertContains( $expected, $actual );
+		$this->assertStringContainsString( $expected, $actual );
 	}
 
 	/**
@@ -97,7 +97,7 @@ class WPT_Test_Pricess extends WPT_UnitTestCase {
 		$actual = do_shortcode( '[wpt_productions post__in="'.$this->production_with_upcoming_event.'"]{{prices}}[/wpt_productions]' );
 		$expected = 'from&nbsp;5.00';
 
-		$this->assertContains( $expected, $actual );
+		$this->assertStringContainsString( $expected, $actual );
 	}
 
 	/**
@@ -109,7 +109,7 @@ class WPT_Test_Pricess extends WPT_UnitTestCase {
 
 		$event = new WPT_Event( $this->upcoming_event_with_prices );
 		$prices = $event->prices();
-		$this->assertNotContains( '1123|named_price',implode( '',$prices ) );
+		$this->assertStringNotContainsString( '1123|named_price',implode( '',$prices ) );
 
 	}
 }

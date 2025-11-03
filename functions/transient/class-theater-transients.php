@@ -24,13 +24,19 @@ class Theater_Transients {
 		if ( ! defined( 'THEATER_TRANSIENTS_OPTION' ) ) {
 			define( 'THEATER_TRANSIENTS_OPTION', 'theater_transient_keys' );
 		}
+		if ( ! defined( 'THEATER_TRANSIENTS_META_OPTION' ) ) {
+			define( 'THEATER_TRANSIENTS_META_OPTION', 'theater_transient_metadata' );
+		}
 
+		self::ensure_storage_initialized();
 		self::enable_reset_hooks();
 
 		// Disable transient resets during imports.
 		add_action( 'wpt/importer/execute/before', array( __CLASS__, 'disable_reset_hooks' ) );
 		add_action( 'wpt/importer/execute/after', array( __CLASS__, 'enable_reset_hooks' ) );
 		add_action( 'wpt/importer/execute/after', array( __CLASS__, 'reset' ) );
+
+		add_action( 'updated_option', array( __CLASS__, 'maybe_cleanup_expired_transient' ), 10, 3 );
 	}
 
 	/**
@@ -72,6 +78,7 @@ class Theater_Transients {
 	 * @return	array	A list of all Theater transients that are in use.
 	 */
 	static function get_transient_keys() {
+		self::ensure_storage_initialized();
 		$transient_keys = get_option( THEATER_TRANSIENTS_OPTION );
 
 		if ( ! $transient_keys ) {
@@ -85,6 +92,141 @@ class Theater_Transients {
 		}
 
 		return $transient_keys;
+	}
+
+	/**
+	 * Removes a transient key from the registry.
+	 *
+	 * @since 0.19
+	 *
+	 * @param string $transient_key The transient key to remove.
+	 * @return void
+	 */
+	public static function remove_transient_key( $transient_key ) {
+		if ( ! $transient_key ) {
+			return;
+		}
+
+		$transient_keys = self::get_transient_keys();
+		$count          = count( $transient_keys );
+		$transient_keys = array_values( array_diff( $transient_keys, array( $transient_key ) ) );
+
+		if ( $count === count( $transient_keys ) ) {
+			return;
+		}
+
+		update_option( THEATER_TRANSIENTS_OPTION, $transient_keys, false );
+	}
+
+	/**
+	 * Deletes expired Theater transients and unregisters them.
+	 *
+	 * @since 0.19
+	 *
+	 * @param string $option    Option name being updated.
+	 * @param mixed  $old_value Previous option value.
+	 * @param mixed  $value     New option value.
+	 * @return void
+	 */
+	public static function maybe_cleanup_expired_transient( $option, $old_value, $value ) {
+		$prefix = '_transient_timeout_';
+
+		if ( 0 !== strpos( $option, $prefix ) ) {
+			return;
+		}
+
+		$transient_key = substr( $option, strlen( $prefix ) );
+
+		if ( ! $transient_key ) {
+			return;
+		}
+
+		$expiration = is_numeric( $value ) ? (int) $value : 0;
+
+		if ( $expiration >= time() ) {
+			return;
+		}
+
+		if ( ! in_array( $transient_key, self::get_transient_keys(), true ) ) {
+			return;
+		}
+
+		delete_option( '_transient_' . $transient_key );
+		delete_option( $option );
+
+		self::remove_transient_key( $transient_key );
+	}
+
+	/**
+	 * Gets metadata for all registered Theater transients.
+	 *
+	 * @since	0.19
+	 *
+	 * @return array
+	 */
+	static function get_transient_metadata() {
+		$metadata = get_option( THEATER_TRANSIENTS_META_OPTION );
+
+		if ( ! $metadata || ! is_array( $metadata ) ) {
+			$metadata = array();
+		}
+
+		return $metadata;
+	}
+
+	/**
+	 * Gets metadata for a specific Theater transient.
+	 *
+	 * @since	0.19
+	 *
+	 * @param	string	$key	The transient key.
+	 * @return	array|null
+	 */
+	static function get_transient_metadata_for( $key ) {
+		$metadata = self::get_transient_metadata();
+
+		if ( isset( $metadata[ $key ] ) && is_array( $metadata[ $key ] ) ) {
+			return $metadata[ $key ];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Updates metadata for a specific Theater transient.
+	 *
+	 * @since	0.19
+	 *
+	 * @param	string	$key		The transient key.
+	 * @param	array	$metadata	The metadata to store.
+	 * @return	void
+	 */
+	static function update_transient_metadata( $key, $metadata ) {
+		$stored_metadata = self::get_transient_metadata();
+
+		$stored_metadata[ $key ] = array(
+			'generated_at' => isset( $metadata['generated_at'] ) ? (int) $metadata['generated_at'] : 0,
+			'expiration'   => isset( $metadata['expiration'] ) ? (int) $metadata['expiration'] : 0,
+		);
+
+		update_option( THEATER_TRANSIENTS_META_OPTION, $stored_metadata, false );
+	}
+
+	/**
+	 * Deletes metadata for a specific Theater transient.
+	 *
+	 * @since	0.19
+	 *
+	 * @param	string	$key	The transient key.
+	 * @return	void
+	 */
+	static function delete_transient_metadata( $key ) {
+		$stored_metadata = self::get_transient_metadata();
+
+		if ( isset( $stored_metadata[ $key ] ) ) {
+			unset( $stored_metadata[ $key ] );
+			update_option( THEATER_TRANSIENTS_META_OPTION, $stored_metadata, false );
+		}
 	}
 
 	/**
@@ -106,5 +248,46 @@ class Theater_Transients {
 		}
 	}
 
-}
+	/**
+	 * Ensures the storage option exists and is not autoloaded.
+	 *
+	 * @since 0.19
+	 * @return void
+	 */
+	private static function ensure_storage_initialized() {
+		global $wpdb;
 
+		$option = get_option( THEATER_TRANSIENTS_OPTION, null );
+
+		if ( null === $option ) {
+			// Create the registry option with autoload disabled so it never loads on every request.
+			add_option( THEATER_TRANSIENTS_OPTION, array(), '', false );
+			return;
+		}
+
+		// Ensure the option remains non-autoloaded even if previously stored differently.
+		$autoload = $wpdb->get_var(
+			$wpdb->prepare( "SELECT autoload FROM {$wpdb->options} WHERE option_name = %s LIMIT 1", THEATER_TRANSIENTS_OPTION )
+		);
+
+		if ( null === $autoload ) {
+			return;
+		}
+
+		if ( in_array( $autoload, array( 'no', 'off', 'auto-off' ), true ) ) {
+			return;
+		}
+
+		// Flip the record to a non-autoload value and clear caches so WP picks up the change immediately.
+		$updated = $wpdb->update(
+			$wpdb->options,
+			array( 'autoload' => 'off' ),
+			array( 'option_name' => THEATER_TRANSIENTS_OPTION )
+		);
+
+		if ( $updated ) {
+			wp_cache_delete( 'alloptions', 'options' );
+			wp_cache_delete( THEATER_TRANSIENTS_OPTION, 'options' );
+		}
+	}
+}

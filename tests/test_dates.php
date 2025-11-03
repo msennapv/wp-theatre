@@ -23,7 +23,7 @@ class WPT_Test_Dates extends WPT_UnitTestCase {
 			)
 		);
 
-		$this->assertContains( $expected, $html );
+		$this->assertStringContainsString( $expected, $html );
 	}
 
 	/**
@@ -61,7 +61,7 @@ class WPT_Test_Dates extends WPT_UnitTestCase {
 			)
 		);
 
-		$this->assertContains( $expected, $html );
+		$this->assertStringContainsString( $expected, $html );
 	}
 
 	function test_event_enddate() {
@@ -74,7 +74,7 @@ class WPT_Test_Dates extends WPT_UnitTestCase {
 
 		$expected = date_i18n( get_option( 'date_format' ),	strtotime( $enddate ) );
 
-		$this->assertContains( $expected, $html );
+		$this->assertStringContainsString( $expected, $html );
 	}
 
 	/**
@@ -110,7 +110,7 @@ class WPT_Test_Dates extends WPT_UnitTestCase {
 		$actual = $production->dates_html();
 		$expected = date( $date_format, time() + DAY_IN_SECONDS ).' to '.date( $date_format, time() + (3 * DAY_IN_SECONDS) );
 
-		$this->assertContains( $expected, $actual );
+		$this->assertStringContainsString( $expected, $actual );
 	}
 
 	/**
@@ -126,7 +126,7 @@ class WPT_Test_Dates extends WPT_UnitTestCase {
 		$actual = $production->dates( array( 'html' => true ) );
 		$expected = date( $date_format, time() + DAY_IN_SECONDS ).' to '.date( $date_format, time() + (3 * DAY_IN_SECONDS) );
 
-		$this->assertContains( $expected, $actual );
+		$this->assertStringContainsString( $expected, $actual );
 	}
 
 	/**
@@ -140,7 +140,7 @@ class WPT_Test_Dates extends WPT_UnitTestCase {
 		$actual = do_shortcode( '[wpt_productions post__in="'.$this->production_with_upcoming_events.'"]{{dates}}[/wpt_productions]' );
 		$expected = date( $date_format, time() + DAY_IN_SECONDS ).' to '.date( $date_format, time() + (3 * DAY_IN_SECONDS) );
 
-		$this->assertContains( $expected, $actual );
+		$this->assertStringContainsString( $expected, $actual );
 	}
 
 	/**
@@ -195,7 +195,7 @@ class WPT_Test_Dates extends WPT_UnitTestCase {
 		$actual = $production->dates_html();
 		$expected = 'until '.date( $date_format, time() + (3 * DAY_IN_SECONDS) );
 
-		$this->assertContains( $expected, $actual );
+		$this->assertStringContainsString( $expected, $actual );
 	}
 
 	/**
@@ -251,7 +251,7 @@ class WPT_Test_Dates extends WPT_UnitTestCase {
 		$actual = $production->dates_html();
 		$expected = date( $date_format, time() + (2 * DAY_IN_SECONDS) ).' to '.date( $date_format, time() + (3 * DAY_IN_SECONDS) );
 
-		$this->assertContains( $expected, $actual );
+		$this->assertStringContainsString( $expected, $actual );
 	}
 	
 

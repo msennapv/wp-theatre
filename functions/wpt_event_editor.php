@@ -105,6 +105,7 @@ class WPT_Event_Editor {
 	 * Handles the event delete AJAX requests.
 	 *
 	 * @since 0.11
+	 * @since 0.18.8	Added an additional check to make sure the current user is allowed to delete the event.
 	 */
 	public function delete_event_over_ajax() {
 
@@ -117,6 +118,11 @@ class WPT_Event_Editor {
 			wp_die();
 		}
 
+		// Ensure the current user has the capability to delete the post.
+		if ( ! current_user_can( 'delete_post', $event_id ) ) {
+		    wp_die( __( 'You are not allowed to delete this date.', 'theatre' ) );
+		}
+		
 		$event = new WPT_Event( $event_id );
 		$production = $event->production();
 

@@ -1,7 +1,7 @@
 <?php
 class WPT_Test_Template extends WP_UnitTestCase {
 
-	function setUp() {
+	protected function setUp(): void {
 		parent::setUp();		
 	}
 
@@ -70,6 +70,32 @@ class WPT_Test_Template extends WP_UnitTestCase {
 		$this->assertEquals($expected, $actual);		
 	}
 	
+	function test_event_template_field_value_filter_receives_event() {
+		$production_id = $this->create_production();
+		$event_id = $this->create_event_for_production($production_id);
+		add_post_meta($event_id, 'event_date', date('Y-m-d H:i:s', time() + (2 * DAY_IN_SECONDS)));
+
+		$event = new WPT_Event($event_id);
+		$template = new WPT_Event_Template($event, '{{title}}');
+
+		$captured_event = null;
+		$callback = function( $value, $field, $args, $filters, $filter_event ) use ( &$captured_event ) {
+			$captured_event = $filter_event;
+			return $value;
+		};
+
+		add_filter( 'wpt/event/template/field/value', $callback, 10, 5 );
+
+		try {
+			$template->get_merged();
+		} finally {
+			remove_filter( 'wpt/event/template/field/value', $callback, 10 );
+		}
+
+		$this->assertInstanceOf( WPT_Event::class, $captured_event );
+		$this->assertSame( $event, $captured_event );
+	}
+
 	function test_template_placeholder_thumbnail() {
 		add_theme_support( 'post-thumbnails' );	
 	    $this->assume_role( 'author' );
@@ -102,10 +128,10 @@ class WPT_Test_Template extends WP_UnitTestCase {
 		wp_delete_attachment($attachment_id, true);
 		
 		$expected = '<figure><img ';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 		$expected = 'src="'.$img_url.'" class="';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 	    remove_theme_support( 'post-thumbnails' );		
 	}
@@ -141,10 +167,10 @@ class WPT_Test_Template extends WP_UnitTestCase {
 		wp_delete_attachment($attachment_id, true);
 		
 		$expected = '<figure><img ';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 		
 		$expected = 'src="'.$img_url.'" class="';
-		$this->assertContains($expected, $actual);
+		$this->assertStringContainsString($expected, $actual);
 
 	    remove_theme_support( 'post-thumbnails' );		
 	}
@@ -196,7 +222,7 @@ class WPT_Test_Template extends WP_UnitTestCase {
 		$expected = 'wp-post-image" alt="Post thumbnail alt text"';
 		$actual = $template->get_merged();
 		
-		$this->assertContains($expected, $actual);			
+		$this->assertStringContainsString($expected, $actual);			
 	}
 
 	function test_template_placeholder_filter_date() {

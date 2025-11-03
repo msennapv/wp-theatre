@@ -116,14 +116,14 @@ class WPT_Test_Transients extends WPT_UnitTestCase {
 		 */
 		$wp_query->query_vars['wpt_category'] = 'film';
 		$html = do_shortcode('[wpt_events paginateby=category]');
-		$this->assertContains('category-film wpt_listing_filter_active',$html);
+		$this->assertStringContainsString('category-film wpt_listing_filter_active',$html);
 
 		/*
 		 * Test if the muziek tab is active.
 		 */
 		$wp_query->query_vars['wpt_category'] = 'muziek';
 		$html = do_shortcode('[wpt_events paginateby=category]');
-		$this->assertContains('category-muziek wpt_listing_filter_active',$html);
+		$this->assertStringContainsString('category-muziek wpt_listing_filter_active',$html);
 	}
 	
 	/**
@@ -191,6 +191,67 @@ class WPT_Test_Transients extends WPT_UnitTestCase {
 		$actual = Theater_Transients::get_transient_keys();
 		$this->assertEmpty( $actual );
 	}
+
+	/**
+	 * When the expiration filter forces a zero TTL the transient should never persist.
+	 */
+	function test_transient_is_not_cached_when_expiration_is_zero() {
+		// Simulate a site forcing immediate expiration via the public filter hook.
+		add_filter( 'theater/transient/expiration', '__return_zero', 10, 2 );
+
+		// Use a random key to avoid interference from other test runs.
+		$transient = new Theater_Transient( 'test', array( 'id' => uniqid( 'transient_', true ) ) );
+
+		// set() should report failure because the value must not be cached.
+		$this->assertFalse( $transient->set( 'should-not-cache' ) );
+		// get() must also return false, confirming nothing was stored.
+		$this->assertFalse( $transient->get() );
+
+		// Clean up the filter to avoid affecting subsequent tests.
+		remove_filter( 'theater/transient/expiration', '__return_zero', 10 );
+	}
+	
+
+	/**
+	 * Confirms that expired transient rows are removed automatically.
+	 */
+	function test_expired_transients_accumulate_without_access() {
+		$callback = function () {
+			return 1; // one second lifetime.
+		};
+
+		add_filter( 'theater/transient/expiration', $callback, 10, 2 );
+
+		$transient_keys = array();
+
+		try {
+			for ( $i = 0; $i < 3; $i++ ) {
+				$args      = array( 'token' => uniqid( 'pileup_', true ) );
+				$transient = new Theater_Transient( 'pileup', $args );
+				$transient->set( 'cached' );
+				$transient_keys[] = $transient->calculate_key( 'pileup', $args );
+			}
+		} finally {
+			remove_filter( 'theater/transient/expiration', $callback, 10 );
+		}
+
+		// Mark all transients as expired without touching them.
+		foreach ( $transient_keys as $key ) {
+			update_option( '_transient_timeout_' . $key, time() - HOUR_IN_SECONDS );
+		}
+
+		// Expired transients should be cleaned up automatically.
+		foreach ( $transient_keys as $key ) {
+			$this->assertFalse(
+				get_option( '_transient_' . $key ),
+				'Expected transient value to be removed automatically once expired.'
+			);
+			$this->assertFalse(
+				get_option( '_transient_timeout_' . $key ),
+				'Expected transient timeout to be removed automatically once expired.'
+			);
+		}
+	}
 	
 	function test_transients_are_off_for_logged_in_users() {
 		$this->setup_test_data();
@@ -226,14 +287,14 @@ class WPT_Test_Transients extends WPT_UnitTestCase {
 		 */
 		$wp_query->query_vars['wpt_category'] = 'film';
 		$html = do_shortcode('[wpt_productions paginateby=category]');
-		$this->assertContains('category-film wpt_listing_filter_active',$html);
+		$this->assertStringContainsString('category-film wpt_listing_filter_active',$html);
 
 		/*
 		 * Test if the muziek tab is active.
 		 */
 		$wp_query->query_vars['wpt_category'] = 'muziek';
 		$html = do_shortcode('[wpt_productions paginateby=category]');
-		$this->assertContains('category-muziek wpt_listing_filter_active',$html);
+		$this->assertStringContainsString('category-muziek wpt_listing_filter_active',$html);
 	}
 	
 	function test_if_corrupted_list_of_transients_is_emptied() {

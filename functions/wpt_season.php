@@ -1,4 +1,5 @@
 <?php
+#[AllowDynamicProperties]
 class WPT_Season {
 	const post_type_name = 'wp_theatre_season';
 	

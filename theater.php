@@ -5,7 +5,7 @@
 	Plugin URI: https://wp.theater/
 	Description: Manage and publish events for your theater, live venue, cinema, club or festival.
 	Author: Jeroen Schmit
-	Version: 0.18.7
+	Version: 0.19
 	Author URI: http://slimndap.com/
 	Text Domain: theatre
 	Domain Path: /lang
@@ -28,7 +28,7 @@
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
 	
-$wpt_version = '0.18.7';
+$wpt_version = '0.19';
 
 class WP_Theatre {
 	
@@ -110,7 +110,6 @@ class WP_Theatre {
 		
 		// Deprecated properties
 		$this->order = new WPT_Order();
-		Theater_Custom_CSS::init();
 		$this->cart = new WPT_Cart();		
 		
 		// Options
@@ -205,7 +204,6 @@ class WP_Theatre {
 		
 		require_once(dirname(__FILE__) . '/functions/deprecated/wpt_cart.php');	
 		require_once(dirname(__FILE__) . '/functions/deprecated/class-wpt-order.php');
-		require_once(dirname(__FILE__) . '/functions/deprecated/class-theater-custom-css.php');
 		
 	}
 	

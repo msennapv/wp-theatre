@@ -16,7 +16,7 @@ class WPT_Test_Tags extends WPT_UnitTestCase {
 		$actual = $html;
 		$expected = get_the_title($this->production_with_historic_event);
 
-		$this->assertContains( $expected, $actual );
+		$this->assertStringContainsString( $expected, $actual );
 		
 		$actual = substr_count($html, '"wp_theatre_prod"');
 		$expected = 2;
@@ -30,7 +30,7 @@ class WPT_Test_Tags extends WPT_UnitTestCase {
 		$actual = do_shortcode( '[wpt_events tag="upcoming"]' );
 		$expected = get_the_title($this->production_with_upcoming_event);
 
-		$this->assertContains( $expected, $actual );
+		$this->assertStringContainsString( $expected, $actual );
 		
 		$actual = substr_count(do_shortcode( '[wpt_events tag="upcoming"]' ), '"wp_theatre_event"');
 		$expected = 1;
@@ -45,13 +45,13 @@ class WPT_Test_Tags extends WPT_UnitTestCase {
 		$actual = do_shortcode( '[wpt_productions]{{tags}}[/wpt_productions]' );
 
 		$expected = '<ul class="wp_theatre_prod_tags">';		
-		$this->assertContains( $expected, $actual );
+		$this->assertStringContainsString( $expected, $actual );
 		
 		$expected = '<li class="wp_theatre_prod_tag wp_theatre_prod_tag_upcoming">upcoming';		
-		$this->assertContains( $expected, $actual );
+		$this->assertStringContainsString( $expected, $actual );
 		
 		$expected = '<li class="wp_theatre_prod_tag wp_theatre_prod_tag_historic">historic';		
-		$this->assertContains( $expected, $actual );
+		$this->assertStringContainsString( $expected, $actual );
 		
 	}
 	
@@ -62,10 +62,10 @@ class WPT_Test_Tags extends WPT_UnitTestCase {
 		$actual = do_shortcode( '[wpt_events]{{title}}{{tags}}[/wpt_events]' );
 
 		$expected = '<ul class="wp_theatre_prod_tags">';		
-		$this->assertContains( $expected, $actual );
+		$this->assertStringContainsString( $expected, $actual );
 		
 		$expected = '<li class="wp_theatre_prod_tag wp_theatre_prod_tag_upcoming">upcoming';		
-		$this->assertContains( $expected, $actual );
+		$this->assertStringContainsString( $expected, $actual );
 		
 	}
 

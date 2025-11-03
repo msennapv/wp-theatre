@@ -69,6 +69,7 @@ class Theater_Transient {
 	 * Gets the transient value.
 	 *
 	 * @since	0.15.24
+	 * @since	0.19	Validates cached metadata and enforces runtime expiration checks.
 	 *
 	 * @uses	Theater_Transient::is_active() to check if the use of transients is active.
 	 *
@@ -81,7 +82,45 @@ class Theater_Transient {
 		if ( ! $this->is_active() ) {
 			return false;
 		}
-		return get_transient( $this->key );
+		$value = get_transient( $this->key );
+
+		// Cache was missing; clean up the book-keeping so we do not keep stale keys around.
+		if ( false === $value ) {
+			Theater_Transients::delete_transient_metadata( $this->key );
+			$this->unregister();
+			return false;
+		}
+
+		// Pull metadata that tracks when the transient was created and for how long it is valid.
+		$metadata     = Theater_Transients::get_transient_metadata_for( $this->key );
+		$generated_at = 0;
+		$expiration   = $this->get_expiration();
+
+		if ( is_array( $metadata ) ) {
+			if ( isset( $metadata['generated_at'] ) ) {
+				$generated_at = (int) $metadata['generated_at'];
+			}
+
+			if ( isset( $metadata['expiration'] ) ) {
+				$expiration = (int) $metadata['expiration'];
+			}
+		}
+
+		if ( $expiration > 0 ) {
+			// No recorded generation moment: treat as corrupted and regenerate.
+			if ( $generated_at <= 0 ) {
+				$this->reset();
+				return false;
+			}
+
+			// Transient has outlived its TTL: remove and force regeneration.
+			if ( ( $generated_at + $expiration ) <= time() ) {
+				$this->reset();
+				return false;
+			}
+		}
+
+		return $value;
 
 	}
 
@@ -89,11 +128,12 @@ class Theater_Transient {
 	 * Gets the expiration of this transient.
 	 *
 	 * @since	0.15.24
+	 * @since	0.19	Normalises invalid filter results back to the default expiration.
 	 * @return	int		The expiration of this transient.
 	 */
 	function get_expiration() {
 
-		$expiration = 10 * MINUTE_IN_SECONDS;
+		$default_expiration = 10 * MINUTE_IN_SECONDS;
 
 		/**
 		 * Filter the expiration of this transient.
@@ -103,9 +143,13 @@ class Theater_Transient {
 		 * @param	int					$expiration	The expiration of this transient.
 		 * @param	Theater_Transient	$transient	The transient object.
 		 */
-		$expiration = apply_filters( 'theater/transient/expiration', $expiration, $this );
+		$expiration = apply_filters( 'theater/transient/expiration', $default_expiration, $this );
 
-		return $expiration;
+		if ( ! is_numeric( $expiration ) ) {
+			$expiration = $default_expiration;
+		}
+
+		return (int) $expiration;
 
 	}
 
@@ -180,6 +224,7 @@ class Theater_Transient {
 	 * Registers the transient in the list of Theater transients that are in use.
 	 *
 	 * @since	0.15.24
+	 * @since	0.19	Ensures the registry option is saved with autoload disabled.
 	 *
 	 * @uses	Theater_Transients::get_transient_keys() to get all Theater transients that are in use.
 	 * @uses	Theater_Transient::key to get the key of the current transient.
@@ -188,14 +233,15 @@ class Theater_Transient {
 	function register() {
 		$transient_keys = Theater_Transients::get_transient_keys();
 		$transient_keys[] = $this->key;
-		$transient_keys = array_unique( $transient_keys );
-		update_option( THEATER_TRANSIENTS_OPTION, $transient_keys, true );
+		$transient_keys = array_values( array_unique( $transient_keys ) );
+		update_option( THEATER_TRANSIENTS_OPTION, $transient_keys, false );
 	}
 
 	/**
 	 * Resets the transient.
 	 *
 	 * @since	0.15.24
+	 * @since	0.19	Also clears the metadata store.
 	 *
 	 * @uses 	Theater_Transient::unregister() to remove the transient from the list of Theater transients that
 	 *			are in use.
@@ -206,9 +252,8 @@ class Theater_Transient {
 
 		$result = delete_transient( $this->key );
 
-		if ( $result ) {
-			$this->unregister();
-		}
+		Theater_Transients::delete_transient_metadata( $this->key );
+		$this->unregister();
 
 		return $result;
 	}
@@ -217,6 +262,7 @@ class Theater_Transient {
 	 * Sets the transient value.
 	 *
 	 * @since	0.15.24
+	 * @since	0.19	Adds runtime guard for zero expiration and stores metadata.
 	 *
 	 * @uses	Theater_Transient::is_active() to check if the use of transients is active.
 	 *
@@ -229,10 +275,26 @@ class Theater_Transient {
 			return false;
 		}
 
-		$result = set_transient( $this->key, $value, $this->get_expiration() );
+		$expiration = $this->get_expiration();
+
+		// Guard against filtered values that effectively disable caching.
+		if ( $expiration < 1 ) {
+			$this->reset();
+			return false;
+		}
+
+		$result = set_transient( $this->key, $value, $expiration );
 
 		if ( $result ) {
 			$this->register();
+			// Persist metadata so reads can detect expiry without relying on the options table TTL.
+			Theater_Transients::update_transient_metadata(
+				$this->key,
+				array(
+					'generated_at' => time(),
+					'expiration'   => $expiration,
+				)
+			);
 		}
 
 		return $result;
@@ -242,15 +304,14 @@ class Theater_Transient {
 	 * Unregisters the transient from the list of Theater transients that are in use.
 	 *
 	 * @since	0.15.24
+	 * @since	0.19	Delegates storage updates to Theater_Transients::remove_transient_key().
 	 *
 	 * @uses	Theater_Transients::get_transient_keys() to get all Theater transients that are in use.
 	 * @uses	Theater_Transient::key to get the key of the current transient.
 	 * @return 	void
 	 */
 	private function unregister() {
-		$transient_keys = Theater_Transients::get_transient_keys();
-		$transient_keys = array_diff( $transient_keys, array( $this->key ) );
-		update_option( THEATER_TRANSIENTS_OPTION, $transient_keys, true );
+		Theater_Transients::remove_transient_key( $this->key );
 	}
 
 

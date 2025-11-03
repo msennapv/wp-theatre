@@ -26,6 +26,7 @@
 			add_action('before_delete_post',array( $this,'before_delete_post'));
 			add_action('wp_trash_post',array( $this,'wp_trash_post'));
 			add_action('untrash_post',array( $this,'untrash_post'));
+			add_filter( 'wp_untrash_post_status', array( $this, 'restore_post_status_on_untrash' ), 10, 3 );
 			
 			add_filter( 'cron_schedules', array($this,'cron_schedules'));
 
@@ -474,6 +475,43 @@
 					wp_untrash_post($event->ID);
 				}							
 			}
+		}
+
+		/**
+		 * Restore the original status for Theatre posts when they are untrashed.
+		 *
+		 * Since WordPress 5.6 untrashing a post defaults to setting the status to 'draft'.
+		 * For Theatre productions and events we want to reinstate the status they had before
+		 * moving to the trash so listings pick them up again.
+		 *
+		 * @since 0.19
+		 *
+		 * @param string $new_status      The status WordPress plans to apply.
+		 * @param int    $post_id         The post being untrashed.
+		 * @param string $previous_status The status that was stored before trashing.
+		 * @return string
+		 */
+		public function restore_post_status_on_untrash( $new_status, $post_id, $previous_status ) {
+			$post = get_post( $post_id );
+
+			if ( empty( $post ) ) {
+				return $new_status;
+			}
+
+			$theatre_post_types = array(
+				WPT_Production::post_type_name,
+				WPT_Event::post_type_name,
+			);
+
+			if ( ! in_array( $post->post_type, $theatre_post_types, true ) ) {
+				return $new_status;
+			}
+
+			if ( ! empty( $previous_status ) && 'trash' !== $previous_status ) {
+				return $previous_status;
+			}
+
+			return 'publish';
 		}
 
 		/**
