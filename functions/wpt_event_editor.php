@@ -72,7 +72,6 @@ class WPT_Event_Editor {
 	 * @since	0.11.5
 	 * @since 	0.12	Event now inherits post_status from production.
 	 *					Fixes #141.
-	 * @since 	0.19.1	Requires capability to edit the production before creating events.
 	 */
 	public function create_event_over_ajax() {
 
@@ -80,22 +79,16 @@ class WPT_Event_Editor {
 
 		parse_str( $_POST['post_data'], $post_data );
 
-		$production_id = isset( $post_data['post_ID'] ) ? absint( $post_data['post_ID'] ) : 0;
-
-		if ( empty( $production_id ) || ! current_user_can( 'edit_post', $production_id ) ) {
-			wp_die( __( 'You are not allowed to create dates for this production.', 'theatre' ) );
-		}
-
 		if ( ! empty($post_data['wpt_event_editor_event_date']) ) {
 
-				$post = array(
-					'post_type' => WPT_Event::post_type_name,
-					'post_status' => get_post_status( $production_id ),
-				);
+			$post = array(
+				'post_type' => WPT_Event::post_type_name,
+				'post_status' => get_post_status( $post_data['post_ID'] ),
+			);
 
-				if ( $event_id = wp_insert_post( $post ) ) {
+			if ( $event_id = wp_insert_post( $post ) ) {
 
-					add_post_meta( $event_id, WPT_Production::post_type_name, $production_id, true );
+				add_post_meta( $event_id, WPT_Production::post_type_name, $post_data['post_ID'], true );
 
 				foreach ( $this->get_fields( $event_id ) as $field ) {
 					$this->save_field( $field, $event_id, $post_data );
@@ -103,7 +96,7 @@ class WPT_Event_Editor {
 			}
 		}
 
-			echo $this->get_listing_html( $production_id );
+		echo $this->get_listing_html( $post_data['post_ID'] );
 
 		wp_die();
 	}
@@ -336,7 +329,7 @@ class WPT_Event_Editor {
 				'id' => 'tickets_url',
 				'title' => __( 'Tickets URL', 'theatre' ),
 				'edit' => array(
-					'placeholder' => 'https://',
+					'placeholder' => 'http://',
 				),
 			),
 			array(
